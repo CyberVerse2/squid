@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.inter-font {
+  font-family: 'Inter', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-variation-settings: 'slnt' 0;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+@layer components {
+  .container {
+    @apply max-w-[1112px] mx-auto px-4;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply inter-font;
+  }
+  h1 {
+    @apply inter-font text-2xl sm:text-8xl;
+  }
+  h2 {
+    @apply inter-font text-xl font-semibold;
+  }
+  p,
+  li,
+  a {
+    @apply inter-font text-xs text-previewMessageColor;
+  }
+}
