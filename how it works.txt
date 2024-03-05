@@ -1,0 +1,3 @@
+User flow:
+user signs up and logs in
+user creates a topic based on issues he's working on

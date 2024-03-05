@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { ChatList } from '../components/chat/chat';
 import { MessageList } from '../components/message/messageList';
 import { Sidebar } from '../components/sidebar/sidebar';
