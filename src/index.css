@@ -13,9 +13,13 @@
 ::-webkit-scrollbar {
   display: none;
 }
+
 @layer components {
   .container {
     @apply max-w-[1112px] mx-auto px-4;
+  }
+  .active {
+    @apply bg-messageColor text-white rounded-md border-none outline-none;
   }
   h1,
   h2,
@@ -31,9 +35,15 @@
   h2 {
     @apply inter-font text-xl font-semibold;
   }
+  h3 {
+    @apply text-sm;
+  }
   p,
   li,
   a {
     @apply inter-font text-xs text-previewMessageColor;
+  }
+  .active {
+    @apply bg-messageColor text-white p-2  rounded-md border-none outline-none;
   }
 }

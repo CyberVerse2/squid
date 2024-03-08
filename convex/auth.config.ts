@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: 'https://loving-walrus-68.clerk.accounts.dev/',
+      domain: 'https://set-cub-94.clerk.accounts.dev',
       applicationID: 'convex'
     }
   ]

@@ -1,4 +1,4 @@
-import { Button } from '../components/button';
+import { SignInButton, SignUpButton } from '@clerk/clerk-react';
 
 export default function Index() {
   return (
@@ -8,7 +8,9 @@ export default function Index() {
           <span className=" text-[30px] font-bold text-black">Squid</span>
         </a>
         <div className="ml-auto">
-          <Button text={'Log In'}></Button>
+          <div className="bg-messageColor text-white px-5 py-2 rounded-md">
+            <SignInButton />
+          </div>
         </div>
       </header>
       <section className="w-full py-12 md:py-16 lg:py-20">
@@ -22,7 +24,9 @@ export default function Index() {
             </p>
           </div>
           <div className="mx-auto w-full max-w-sm space-y-3">
-            <Button text={'Sign Up'}></Button>
+            <div className="bg-messageColor text-white px-5 py-2 rounded-md">
+              <SignUpButton />
+            </div>
             {/* </a> */}
             <p className="text-xs text-gray-500 dark:text-gray-400">
               By clicking Sign Up, you agree to our{' '}

@@ -1,15 +1,26 @@
-import { useState } from 'react';
 import { Home } from './pages/home.jsx';
 import './App.css';
 import Index from './pages/index.jsx';
-import { SignInButton } from '@clerk/clerk-react';
-const isAuthenticated = true;
+import { useConvexAuth } from 'convex/react';
+import LoadingSpinner from './components/general/components/loadingSpinner.jsx';
+import Modal from './components/general/components/modal.jsx';
+import { useState } from 'react';
+
 function App() {
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  const openModal = () => {
+    setIsOpen(true);
+  };
   return (
     <>
-      <SignInButton mode="modal" />
-      <h1>shege</h1>
-      <Home/>
+      {isOpen && <Modal closeModal={closeModal} />}
+      {isAuthenticated ? <Home openModal={openModal}/> : isLoading ? <LoadingSpinner /> : <Index />}
     </>
   );
 }
