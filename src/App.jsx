@@ -4,7 +4,8 @@ import Index from './pages/index.jsx';
 import { useConvexAuth } from 'convex/react';
 import LoadingSpinner from './components/general/components/loadingSpinner.jsx';
 import Modal from './components/general/components/modal.jsx';
-import { useState } from 'react';
+
+import React, { useState } from 'react';
 
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
@@ -17,10 +18,17 @@ function App() {
   const openModal = () => {
     setIsOpen(true);
   };
+
   return (
     <>
       {isOpen && <Modal closeModal={closeModal} />}
-      {isAuthenticated ? <Home openModal={openModal}/> : isLoading ? <LoadingSpinner /> : <Index />}
+      {isLoading ? (
+        <LoadingSpinner /> // Render the loading spinner if resources are still loading
+      ) : isAuthenticated ? (
+        <Home openModal={openModal} />
+      ) : (
+        <Index />
+      )}
     </>
   );
 }

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useUser } from '@clerk/clerk-react';
 
 export function Sidebar({ openModal }) {
+  const {user} = useUser()
   return (
     <div className="w-20 flex flex-col justify-start items-center max-h-[100vh] border border-gray-200">
-      <img src="/profile.png" alt="User profile" className="w-10 py-4" />
+      <img src={user.imageUrl} alt="User profile" className="w-10 py-4" />
       <div className="py-5 flex flex-col justify-between h-full">
         <div className="flex flex-col h-20 justify-between">
           <svg
