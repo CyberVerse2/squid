@@ -1,7 +1,8 @@
 import { useUser } from '@clerk/clerk-react';
 
 export function Sidebar({ openModal }) {
-  const {user} = useUser()
+  const { user } = useUser()
+  
   return (
     <div className="w-20 flex flex-col justify-start items-center max-h-[100vh] border border-gray-200">
       <img src={user.imageUrl} alt="User profile" className="w-10 py-4" />

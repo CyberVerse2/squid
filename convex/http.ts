@@ -1,5 +1,5 @@
 import { HttpRouter, httpRouter } from 'convex/server';
-import { webhookHandler } from './user';
+import { webhookHandler } from './github';
 
 const http = httpRouter();
 

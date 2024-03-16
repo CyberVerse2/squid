@@ -3,10 +3,14 @@ import { v } from 'convex/values'
 export default defineSchema({
   users: defineTable({
     name: v.string(),
+    githubUsername: v.optional(v.string()),
+    clerkId: v.string(),
     email: v.string(),
     installationId: v.optional(v.number()),
-    profileImg: v.string()
-  }),
+    profileUrl: v.optional(v.string())
+  })
+    .index('by_clerkId', ['clerkId'])
+    .index('by_githubUsername', ['githubUsername']),
   projects: defineTable({
     name: v.string(),
     description: v.string(),

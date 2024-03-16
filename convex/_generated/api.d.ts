@@ -15,7 +15,9 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as environment from "../environment.js";
+import type * as github from "../github.js";
 import type * as http from "../http.js";
+import type * as issues from "../issues.js";
 import type * as user from "../user.js";
 import type * as utils from "../utils.js";
 
@@ -29,7 +31,9 @@ import type * as utils from "../utils.js";
  */
 declare const fullApi: ApiFromModules<{
   environment: typeof environment;
+  github: typeof github;
   http: typeof http;
+  issues: typeof issues;
   user: typeof user;
   utils: typeof utils;
 }>;

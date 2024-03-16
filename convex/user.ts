@@ -4,96 +4,89 @@ import { internalMutation, mutation, query } from './_generated/server';
 import { Auth, GenericActionCtx } from 'convex/server';
 import { ConvexError } from 'convex/values';
 import { httpAction, internalQuery } from './_generated/server';
-import { userMutation, userQuery, verifyWebhookPayload } from './utils';
+import { getCurrentUser, userMutation, userQuery, verifyWebhookPayload } from './utils';
 import { internal } from './_generated/api';
 import ENVIRONMENT from './environment';
 import { App } from '@octokit/app';
 import { Id } from './_generated/dataModel';
-import { Buffer } from 'buffer';
 
-const YOUR_APP_ID = 123456; // Replace with your GitHub App ID
-const PRIVATE_KEY_BUFFER = `${ENVIRONMENT.GITHUB.PRIVATE_KEY}==`;
-const key = Buffer.from(PRIVATE_KEY_BUFFER, 'base64').toString('ascii');
-const app = new App({
-  appId: YOUR_APP_ID,
-  privateKey: key,
-  webhooks: {
-    secret: ENVIRONMENT.GITHUB.WEBHOOK_SECRET!
-  }
-});
-
-export const internalGetUser = internalQuery({
-  args: {},
-  async handler(ctx, _) {
-    await getUser(ctx, {});
-  }
-});
+// export const internalGetUser = internalQuery({
+//   args: {},
+//   async handler(ctx, _) {
+//     await getUser(ctx, {});
+//   }
+// });
 
 export const internalUpdateUser = internalMutation({
   args: {
+    nickname: v.string(),
     installationId: v.number()
   },
-  async handler(ctx, { installationId }) {
-    updateUser(ctx, { installationId });
+  async handler(ctx, { nickname, installationId }) {
+    return updateUser(ctx, { nickname, installationId });
   }
 });
 
-export const webhookHandler = httpAction(async (ctx, request) => {
-  const body = await request.json();
-
-  if (!verifyWebhookPayload(request as unknown as GenericActionCtx<any>, body)) {
-    return new Response('Unauthorized', {
-      status: 401
-    });
-  }
-  const userId = await getUserId(ctx);
-
-  if (userId === undefined) {
-    throw new ConvexError('User must be logged in.');
-  }
-
-  app.webhooks.on('installation', async ({ octokit, payload }) => {
-    const { installation } = payload;
-    await ctx.runMutation(internal.user.internalUpdateUser, {
-      installationId: installation.id
-    });
-    return new Response(`Installation Successful with id`, {
-      status: 200
-    });
-  });
-  return new Response(`Webhook Recieved`, {
-    status: 200
-  });
-});
-
-export const createUser = mutation({
-  args: {
-    name: v.string(),
-    email: v.string(),
-    profileImg: v.string()
-  },
-  async handler(ctx, args) {
-    const user = await ctx.db.insert('users', args);
-  }
-});
-
-export const getUser = userQuery({
+export const createUser = userMutation({
   args: {},
+  async handler(ctx, _) {
+    const user = await getCurrentUser(ctx);
+    const { subject, email, name, pictureUrl, nickname } = await ctx.auth.getUserIdentity();
+
+
+    if (user.cause) {
+      if (user.cause?.type === 'NOT_FOUND') {
+        await ctx.db.insert('users', {
+          clerkId: subject,
+          email: email,
+          name: name,
+          githubUsername: nickname,
+          profileUrl: pictureUrl
+        });
+      }
+    } else if (user.githubUsername) {
+      patchUser(ctx, {}); // Pass an empty object as the second argument
+    }
+  }
+});
+export const patchUser = userMutation({
+  args: {},
+
   async handler(ctx) {
-    return await ctx.db.get(ctx.userId as Id<'users'>);
+    const { subject, email, name, profileUrl, nickname } = await ctx.auth.getUserIdentity()
+    const {githubUsername} = await getCurrentUser(ctx)
+
+    const [userWithEmailExists] = await ctx.db
+      .query('users')
+      .withIndex('by_githubUsername', (q) => q.eq('githubUsername', githubUsername))
+      .collect();
+
+    return userWithEmailExists
+      ? null
+      : ctx.db.insert('users', {
+          clerkId: subject,
+          email,
+          name,
+          profileUrl,
+          githubUsername: nickname
+        });
   }
 });
 
-export async function getUserId(ctx: { auth: Auth }) {
-  const authInfo = await ctx.auth.getUserIdentity();
-  return authInfo?.tokenIdentifier;
-}
-
-export const updateUser = userMutation({
+export const updateUser = mutation({
   args: {
+    nickname: v.string(),
     installationId: v.number()
   },
-  async handler(ctx, { installationId }) {
-    await ctx.db.patch(ctx.userId as Id<'users'>, { installationId });
+  async handler(ctx, { nickname, installationId }) {
+    const [user] = await ctx.db
+      .query('users')
+      .withIndex('by_githubUsername', (q) => q.eq('githubUsername', nickname.toLowerCase()))
+      .collect();
+
+    if (!user.githubUsername) throw new ConvexError('User with the github username not found');
+
+    const updatedUser = await ctx.db.patch(user._id, { installationId });
+    console.log(updatedUser)
   }
 });

@@ -1,31 +1,31 @@
 import { Home } from './pages/home.jsx';
 import './App.css';
 import Index from './pages/index.jsx';
-import { useConvexAuth } from 'convex/react';
+import { Authenticated, useConvexAuth } from 'convex/react';
 import LoadingSpinner from './components/general/components/loadingSpinner.jsx';
-import Modal from './components/general/components/modal.jsx';
-
-import React, { useState } from 'react';
+import { useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
+import { useAction, useMutation, useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
 
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const createUser = useMutation(api.user.createUser)
+  const createIssue = useAction(api.issues.getAllIssues)
+  createIssue({githubUsername:'CyberVerse2', installationId: 48504203}).then(issue => console.log(issue))
+  // console.log(newIssue)
 
-  const closeModal = () => {
-    setIsOpen(false);
-  };
-
-  const openModal = () => {
-    setIsOpen(true);
-  };
-
+  useEffect(() => {
+    if (isAuthenticated) {
+      createUser();
+    }
+  }, [createUser, isAuthenticated]);
   return (
     <>
-      {isOpen && <Modal closeModal={closeModal} />}
       {isLoading ? (
         <LoadingSpinner /> // Render the loading spinner if resources are still loading
       ) : isAuthenticated ? (
-        <Home openModal={openModal} />
+        <Home />
       ) : (
         <Index />
       )}
