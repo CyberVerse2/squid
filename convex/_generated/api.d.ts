@@ -9,17 +9,12 @@
  * @module
  */
 
-import type {
-  ApiFromModules,
-  FilterApi,
-  FunctionReference,
-} from "convex/server";
-import type * as environment from "../environment.js";
-import type * as github from "../github.js";
-import type * as http from "../http.js";
-import type * as issues from "../issues.js";
-import type * as user from "../user.js";
-import type * as utils from "../utils.js";
+import type { ApiFromModules, FilterApi, FunctionReference } from 'convex/server';
+import type * as environment from '../environment.js';
+import type * as github from '../webhook.js';
+import type * as http from '../http.js';
+import type * as user from '../user.js';
+import type * as utils from '../utils.js';
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -33,15 +28,8 @@ declare const fullApi: ApiFromModules<{
   environment: typeof environment;
   github: typeof github;
   http: typeof http;
-  issues: typeof issues;
   user: typeof user;
   utils: typeof utils;
 }>;
-export declare const api: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "public">
->;
-export declare const internal: FilterApi<
-  typeof fullApi,
-  FunctionReference<any, "internal">
->;
+export declare const api: FilterApi<typeof fullApi, FunctionReference<any, 'public'>>;
+export declare const internal: FilterApi<typeof fullApi, FunctionReference<any, 'internal'>>;

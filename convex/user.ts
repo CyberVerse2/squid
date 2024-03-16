@@ -1,14 +1,8 @@
 ('use node');
 import { v } from 'convex/values';
 import { internalMutation, mutation, query } from './_generated/server';
-import { Auth, GenericActionCtx } from 'convex/server';
 import { ConvexError } from 'convex/values';
-import { httpAction, internalQuery } from './_generated/server';
 import { getCurrentUser, userMutation, userQuery, verifyWebhookPayload } from './utils';
-import { internal } from './_generated/api';
-import ENVIRONMENT from './environment';
-import { App } from '@octokit/app';
-import { Id } from './_generated/dataModel';
 
 // export const internalGetUser = internalQuery({
 //   args: {},
