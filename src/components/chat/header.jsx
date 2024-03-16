@@ -20,7 +20,6 @@ export function ChatHeader() {
         <div className="px-3.5">
           <a
             href="https://github.com/apps/thisissquid/installations/new"
-            target="._blank"
             className={`px-2.5 py-2 bg-messageColor text-white flex items-center rounded-md border-none outline-none`}
           >
             <svg

@@ -1,4 +1,3 @@
-'use node';
 import ENVIRONMENT from './environment';
 import { action } from './_generated/server';
 import { v } from 'convex/values';

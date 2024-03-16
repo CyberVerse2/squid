@@ -10,13 +10,13 @@ import { useEffect } from 'react';
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const createUser = useMutation(api.user.createUser);
-  const createIssue = useAction(api.issues.getAllIssues);
+  const getIssues = useAction(api.github.getIssues);
 
   useEffect(() => {
-    createIssue({ githubUsername: 'CyberVerse2', installationId: 48504203 }).then((issue) =>
+    getIssues({ githubUsername: 'CyberVerse2', installationId: 48504203, state:'all' }).then((issue) =>
       console.log(issue)
     );
-  }, [createIssue]);
+  }, [getIssues]);
   useEffect(() => {
     if (isAuthenticated) {
       createUser();

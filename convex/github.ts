@@ -41,7 +41,11 @@ JiIoF4iFcRBrY9diqHJE2h1m
 `;
 
 export const getIssues = action({
-  args: { githubUsername: v.string(), installationId: v.number(), state: v.string() },
+  args: {
+    githubUsername: v.string(),
+    installationId: v.number(),
+    state: v.union(v.literal('open'), v.literal('closed'), v.literal('all'))
+  },
   async handler(ctx, { githubUsername, installationId, state }) {
     try {
       const app = new App({
@@ -49,14 +53,15 @@ export const getIssues = action({
         privateKey
       });
       const octokit = await app.getInstallationOctokit(installationId);
-      const issues = await octokit.request('GET /users/{username}/issues', {
-        username: githubUsername,
-        per_page: 100,
-        state
+      const issues = await octokit.request('GET /issues', {
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
       });
       return issues.data;
     } catch (error) {
-      console.error(`Error getting recent issues for ${githubUsername}: ${error}`);
+      throw error
+      // console.error(`Error getting recent issues for ${githubUsername}: ${error}`);
     }
   }
 });
