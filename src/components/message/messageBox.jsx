@@ -1,16 +1,31 @@
-import { Message } from "./message";
+import { useEffect, useRef } from 'react';
+import { Message } from './message';
+import { useUser } from '@clerk/clerk-react';
 
-export function MessageBox() {
-  const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]; // Sample array
+export function MessageBox({ chat }) {
+	const { user } = useUser();
+	const messageContainer = useRef(null);
 
-  return (
-    <div className="py-2 overflow-scroll border-t border-gray-200 h-[65.5vh]">
-      {arr.map((item) => (
-        <Message key={item} username={`User ${item}`} text={`Sample text sfsfkhsfa\fsksksfhkshfkshf sfs
-        sfskfhskfsa\
-        sfskfahfaf
-        skfhskagkg${item}`} />
-      ))}
-    </div>
-  );
+	useEffect(() => {
+		messageContainer.current.scrollTop =
+			messageContainer.current.scrollHeight;
+	}, [chat]);
+  console.log(chat)
+
+	return (
+		<div
+			ref={messageContainer}
+			className="py-2 overflow-scroll border-t border-gray-200 h-[65.5vh]"
+		>
+			{chat.map((item) => (
+				<Message
+					key={item}
+					username={item.name}
+					text={item.message.text}
+					imageSrc={item.message.imageSrc}
+					me={item.name == user.firstName}
+				/>
+			))}
+		</div>
+	);
 }

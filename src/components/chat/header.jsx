@@ -1,10 +1,67 @@
-import { useEffect } from 'react';
+
+import { Fragment, useState, useEffect } from 'react';
+
+
 import { Button } from '../general/components/button';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useUser } from '@clerk/clerk-react';
 
+function NewIssueModal() {
+	const [issueDetails, setIssueDetails] = useState({
+		name: '',
+		description: '',
+	});
+	const handleChange = (e) => {
+		const { name, value } = e.target;
+		setIssueDetails((prev) => {
+			return {
+				...prev,
+				[name]: value,
+			};
+		});
+	};
+	return (
+		<Fragment>
+			<div className='fixed bg-gray-500 h-screen w-screen top-0 left-0' />
+			<form className='w-[35%] rounded-md top-1/2 left-1/2 translate-x-1/2 translate-y-1/2'>
+				<div> 
+					<h1>New Issue</h1>
+					<span>
+						<img src="/icons/cancel.svg" alt="" />
+					</span>
+				</div>
+				<div>
+					<div>
+						<label htmlFor="name">Name</label>
+						<input
+							value={issueDetails.name}
+							name="name"
+							onChange={handleChange}
+							type="text"
+							inputMode="text"
+						/>
+					</div>
+					<div>
+						<label htmlFor="description">Description</label>
+						<input
+							value={issueDetails.description}
+							name="description"
+							onChange={handleChange}
+							type="text"
+							inputMode="text"
+						/>
+					</div>
+				</div>
+        <button>Create Issue</button>
+			</form>
+		</Fragment>
+	);
+}
+
 export function ChatHeader() {
+	const [showIssueModal, setShowIssueModal] = useState(false);
+  
   const updateUserOauthCode = useMutation(api.user.updateUserOauthCode);
   const updateUserAccessToken = useMutation(api.user.updateUserAccessToken);
   const user = useQuery(api.user.getUser);
@@ -35,24 +92,24 @@ export function ChatHeader() {
     }
     shege();
   }, [getUserToken, updateUserAccessToken, updateUserOauthCode, user?.oauthCode, username]);
-
-  return (
-    <>
-      <div className="flex  items-center justify-between w-full">
-        <header className="flex items-center justify-between space-x-4 p-3 border-b border-gray-100 w-4/5 ">
-          <h1 className="font-bold text-2xl hidden md:block md:px-4">Squid</h1>
-          <nav className="flex ml-4 md:ml-0">
-            <input
-              className="w-full md:w-[500px] text-sm outline-none border border-gray-200 rounded-md p-2"
-              id="search"
-              placeholder="Search issues, pull requests, and discussions"
-            />
-            <div className="flex items-center px-3">
-              <Button size={'small'} text={'New issue'} />
-            </div>
-          </nav>
-        </header>
-        <div className="px-3.5">
+	return (
+		<>
+			<header className="flex items-center justify-between space-x-4 p-3 border-b border-gray-100">
+				<h1 className="font-bold text-2xl hidden md:block md:px-4">
+					Squid
+				</h1>
+				<nav className="flex ml-4 md:ml-0">
+					<input
+						className="w-full md:w-[500px] text-sm outline-none border border-gray-200 rounded-md p-2"
+						id="search"
+						placeholder="Search issues, pull requests, and discussions"
+					/>
+					<div onClick={()=>setShowIssueModal(!showIssueModal)} className="flex items-center px-3">
+						<Button size={' small'} text={'New issue'} />
+					</div>
+				</nav>
+        {showIssueModal && <NewIssueModal />}
+				 <div className="px-3.5">
           <a
             href="#"
             onClick={user?.oauthCode && user?.accessToken ? () => null : loginWithGithub}
@@ -81,7 +138,9 @@ export function ChatHeader() {
             </p>
           </a>
         </div>
-      </div>
-    </>
-  );
+			</header>
+		</>
+	);
+
+
 }
