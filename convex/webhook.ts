@@ -1,5 +1,5 @@
 import ENVIRONMENT from './environment';
-import { action } from './_generated/server';
+import { action, internalAction } from './_generated/server';
 import { v } from 'convex/values';
 import { httpAction } from './_generated/server';
 import { GenericActionCtx } from 'convex/server';
@@ -8,10 +8,11 @@ import { ConvexError } from 'convex/values';
 import { internal } from './_generated/api';
 import { App } from 'octokit';
 
+
 export const webhookHandler = httpAction(async (ctx, request) => {
   const body = await request.json();
   const { action, installation } = body;
-  console.log(action, installation)
+  console.log(action, installation);
 
   // const headers = request.headers;
 
@@ -21,10 +22,10 @@ export const webhookHandler = httpAction(async (ctx, request) => {
   // if (!isWebhookValid) {
   //   throw new ConvexError('The webhook is invalid');
   // }
-console.log(action)
+  console.log(action);
   switch (action) {
     case 'created':
-      console.log('created')
+      console.log('created');
       await handleInstallationCreated(ctx, installation, installation.account.login);
   }
 
@@ -33,13 +34,36 @@ console.log(action)
   });
 });
 
+export const getUserToken = action({
+  args: {
+    code: v.string()
+  },
+  async handler(ctx, { code }) {
+    try {
+      return await fetch(
+        `https://github.com/login/oauth/access_token?client_id=${ENVIRONMENT.GITHUB.CLIENT_ID}&client_secret=${ENVIRONMENT.GITHUB.CLIENT_SECRET}&code=${code}`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json'
+          }
+        }
+      )
+        .then((response) => response.json())
+        .then((data) => data);
+    } catch (error) {
+      throw new Error('Fetching Access token failed')
+    }
+  }
+});
+
 export async function handleInstallationCreated(
   ctx: GenericActionCtx<any>,
   installation: any,
   nickname: string
 ) {
-  console.log('THIS ACTIVATED')
-  console.log(nickname, installation)
+  console.log('THIS ACTIVATED');
+  console.log(nickname, installation);
   await ctx.runMutation(internal.user.internalUpdateUser, {
     nickname,
     installationId: installation.id
@@ -48,4 +72,3 @@ export async function handleInstallationCreated(
     status: 200
   });
 }
-
