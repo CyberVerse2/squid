@@ -10,9 +10,9 @@ export function Home() {
   return (
     <div className="flex w-full max-h-[100vh]">
       <Sidebar openModal={() => setIsOpen(true)} />
-      <div className="w-full">
+      <div className="w-full ">
         <ChatHeader />
-        <div className="grid grid-cols-7 w-full ">
+        <div className="flex justify-between h-[90vh]">
           <ChatList />
           <MessageList />
         </div>

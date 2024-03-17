@@ -2,7 +2,7 @@ import { Label } from '../general/components/label';
 import { IssueClosed, IssueOpened } from '../general/icons/issue';
 
 export function ChatItem() {
-  return (
+  return (  
     <div className=" hover:bg-chatColor transition-colors flex  rounded-md ">
       <div className="flex flex-col justify-between w-full p-2">
         <div className="flex items-center justify-between">
