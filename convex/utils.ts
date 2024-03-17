@@ -1,6 +1,6 @@
 import { QueryCtx, action, httpAction, mutation, query } from './_generated/server';
 import ENVIRONMENT from './environment';
-import { customMutation, customCtx, customQuery } from 'convex-helpers/server/customFunctions';
+import { customMutation, customCtx, customQuery, customAction } from 'convex-helpers/server/customFunctions';
 import { ConvexError, v } from 'convex/values';
 import { Auth } from 'convex/server';
 
@@ -46,7 +46,7 @@ export const verifyWebhookPayload = action({
 });
 
 // Custom secure string comparison function
-function secureStringCompare(a:string, b: string) {
+function secureStringCompare(a: string, b: string) {
   if (a.length !== b.length) {
     return false;
   }
@@ -57,16 +57,15 @@ function secureStringCompare(a:string, b: string) {
   return result === 0;
 }
 
-
-
 export const userMutation = customMutation(
   mutation,
   customCtx(async (ctx) => {
     const userId = await getUserId(ctx);
+    const user = await getCurrentUser(ctx);
     if (userId === undefined) {
       throw new ConvexError('User must be logged in.');
     }
-    return { userId };
+    return { user };
   })
 );
 
@@ -98,8 +97,24 @@ export const getCurrentUser = async (ctx: QueryCtx) => {
 export const userQuery = customQuery(
   query,
   customCtx(async (ctx) => {
-    return {
-      userId: await getUserId(ctx)
-    };
+    const userId = await getUserId(ctx);
+    const user = await getCurrentUser(ctx);
+    if (userId === undefined) {
+      throw new ConvexError('User must be logged in.');
+    }
+    return { user };
+  })
+);
+
+
+export const userAction = customAction(
+  action,
+  customCtx(async (ctx) => {
+    const userId = await getUserId(ctx);
+    const user = await getCurrentUser(ctx as any);
+    if (userId === undefined) {
+      throw new ConvexError('User must be logged in.');
+    }
+    return { user };
   })
 );

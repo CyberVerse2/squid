@@ -13,15 +13,17 @@ function App() {
   const getIssues = useAction(api.github.getIssues);
 
   useEffect(() => {
-    getIssues({ githubUsername: 'CyberVerse2', installationId: 48504203, state:'all' }).then((issue) =>
-      console.log(issue)
+    getIssues({ githubUsername: 'CyberVerse2', installationId: 48504203, state: 'all' }).then(
+      (issue) => console.log(issue)
     );
   }, [getIssues]);
+  
   useEffect(() => {
     if (isAuthenticated) {
       createUser();
     }
   }, [createUser, isAuthenticated]);
+
   return (
     <>
       {isLoading ? (
