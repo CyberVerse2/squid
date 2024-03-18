@@ -7,7 +7,6 @@ export default defineSchema({
     clerkId: v.string(),
     email: v.string(),
     installationId: v.optional(v.number()),
-    oauthCode: v.optional(v.string()),
     accessToken: v.optional(v.string()),
     profileUrl: v.optional(v.string())
   })

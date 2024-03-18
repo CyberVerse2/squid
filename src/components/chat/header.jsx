@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect } from 'react';
 
 import { Button } from '../general/components/button';
-import { useAction, useMutation, useQuery } from 'convex/react';
+import { useAction, useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { useUser } from '@clerk/clerk-react';
 
@@ -60,15 +60,13 @@ function NewIssueModal() {
 export function ChatHeader() {
   const [showIssueModal, setShowIssueModal] = useState(false);
 
-  const updateUserOauthCode = useMutation(api.user.updateUserOauthCode);
   const updateUserAccessToken = useMutation(api.user.updateUserAccessToken);
   const user = useQuery(api.user.getUser);
+  console.log(user);
   const getUserToken = useAction(api.webhook.getUserToken);
   const getIssues = useAction(api.github.getIssues);
-  const {
-    user: { username }
-  } = useUser();
-  const isUserConnected = user?.oauthCode && user?.accessToken;
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const isUserConnected = isAuthenticated && user?.accessToken && user?.accessToken !== 'null';
 
   function loginWithGithub() {
     window.location.assign(
@@ -78,18 +76,20 @@ export function ChatHeader() {
   function getCode() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const codeParam = urlParams.get('code');
+    return urlParams.get('code');
   }
   async function storeAccessToken() {
     const codeParam = getCode();
-    if (username && codeParam) {
-      updateUserOauthCode({ oauthCode: codeParam });
-      if (user?.oauthCode) {
-        const token = await getUserToken({ code: user.oauthCode });
-        console.log(token);
+    if (isAuthenticated) {
+      if (codeParam) {
+        const token = await getUserToken({ code: codeParam });
         if (token?.access_token) {
           updateUserAccessToken({ accessToken: token.access_token });
           console.log(await getIssues());
+        } else if (token.error === 'bad_verification_code' && isUserConnected) {
+          console.log(token);
+          console.log(token.error === 'bad_verification_code', isUserConnected);
+          updateUserAccessToken({ accessToken: 'null' });
         }
       }
     }
