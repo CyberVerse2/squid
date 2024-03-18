@@ -68,9 +68,13 @@ export const getIssue = userMutation({
 
 export const getIssueComments = userQuery({
   args: {
-    issueId: v.number()
+    issueId: v.id("issues")
   },
   async handler(ctx, args) {
+    // const issue = await ctx.db
+    //   .query('issues')
+    //   .withIndex('issueId', (q) => q.eq('issueId', args.issueId))
+    //   .unique();
     return await getManyFrom(ctx.db, 'comments', 'issueId', args.issueId);
   }
 });

@@ -96,10 +96,8 @@ export function ChatHeader() {
   const updateUserAccessToken = useMutation(api.user.updateUserAccessToken);
   const user = useQuery(api.user.getUser);
   const getUserToken = useAction(api.webhook.getUserToken);
-  const getIssues = useAction(api.github.getIssues);
   const createIssue = useMutation(api.issues.createIssue);
   const createComment = useMutation(api.issues.createComment);
-  const getIssueComments = useAction(api.github.getIssueComments);
   const getIssuesAndComments = useAction(api.github.getIssuesAndComments);
   const isUserConnected = isAuthenticated && user?.accessToken && user?.accessToken !== 'null';
 

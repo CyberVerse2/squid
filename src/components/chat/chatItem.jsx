@@ -5,6 +5,7 @@ import { IssueClosed, IssueOpened } from '../general/icons/issue';
 import { useShowChat } from '../providers/ShowChatProvider';
 import { api } from '../../../convex/_generated/api';
 import { useCurrentIssue } from '../providers/IssueProvider';
+import { getElapsedTimeDescription } from '../../utils/getTimeElapsed';
 
 export function ChatItem({ issue }) {
   const { setShowChat } = useShowChat();
@@ -14,26 +15,7 @@ export function ChatItem({ issue }) {
     setShowChat(true);
   };
 
-  function getElapsedTimeDescription(dateString) {
-    const specificDate = new Date(dateString);
-    const currentDate = new Date();
-    const differenceInMilliseconds = currentDate - specificDate;
-    const millisecondsInADay = 1000 * 60 * 60 * 24;
-    const millisecondsInAWeek = millisecondsInADay * 7;
-    const millisecondsInAMonth = millisecondsInADay * 30;
 
-    if (differenceInMilliseconds / millisecondsInADay < 7) {
-      return `${1}d`;
-    } else if (differenceInMilliseconds < millisecondsInAWeek) {
-      return '1w';
-    } else if (differenceInMilliseconds > millisecondsInAWeek) {
-      return `${Math.floor(differenceInMilliseconds / millisecondsInAWeek)}w`;
-    } else if (differenceInMilliseconds < millisecondsInAMonth) {
-      return '2w';
-    } else {
-      return '1m';
-    }
-  }
 
   async function handleClickIssue() {
     handleShowChat();
