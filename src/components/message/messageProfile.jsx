@@ -3,7 +3,7 @@ import { IssueOpened } from '../general/icons/issue';
 
 export function MessageProfile() {
   return (
-    <div className="flex items-center  py-2">
+    <div className="flex items-center py-4 ">
       <div className="px-3 flex flex-col">
         <div className="flex">
           <span className='flex items-center'>

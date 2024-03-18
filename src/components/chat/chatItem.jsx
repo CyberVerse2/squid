@@ -1,9 +1,15 @@
 import { Label } from '../general/components/label';
 import { IssueClosed, IssueOpened } from '../general/icons/issue';
+import { useShowChat } from '../providers/ShowChatProvider';
 
 export function ChatItem() {
+  const {showChat, setShowChat} = useShowChat();
+  const handleShowChat =()=> {
+    setShowChat(true);
+  }
+
   return (  
-    <div className=" hover:bg-chatColor transition-colors flex  rounded-md ">
+    <div onClick={handleShowChat}  className="lg:pointer-events-none active:bg-chatColor lg:hover:bg-chatColor transition-colors flex  rounded-md ">
       <div className="flex flex-col justify-between w-full p-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center">

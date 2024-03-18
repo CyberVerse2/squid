@@ -1,5 +1,5 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { Home } from './pages/home.jsx';
+
+import { Home } from './pages/Home';
 import './App.css';
 import Index from './pages/index.jsx';
 import { useConvexAuth } from 'convex/react';
@@ -7,6 +7,7 @@ import LoadingSpinner from './components/general/components/loadingSpinner.jsx';
 import { useAction, useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { useEffect } from 'react';
+import ShowChatProvider from './components/providers/ShowChatProvider.jsx';
 
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
@@ -17,15 +18,15 @@ function App() {
   }, [isAuthenticated]);
 
   return (
-    <>
-      {isLoading ? (
-        <LoadingSpinner /> // Render the loading spinner if resources are still loading
-      ) : isAuthenticated ? (
-        <Home />
-      ) : (
-        <Index />
-      )}
-    </>
+    <ShowChatProvider>
+        {isLoading ? (
+          <LoadingSpinner /> // Render the loading spinner if resources are still loading
+        ) : isAuthenticated ? (
+          <Home />
+        ) : (
+          <Index />
+        )}
+    </ShowChatProvider>
   );
 }
 
