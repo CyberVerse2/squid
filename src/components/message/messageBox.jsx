@@ -16,7 +16,7 @@ export function MessageBox({ chat }) {
 	return (
 		<div
 			ref={messageContainer}
-			className={`py-2 max-h-screen   border-t border-gray-200`}
+			className={`py-2 flex-1 overflow-y-auto  border-t border-gray-200`}
 		>
 			{chat.map((item, key) => (
 				<Message
