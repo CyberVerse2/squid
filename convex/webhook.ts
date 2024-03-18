@@ -8,21 +8,11 @@ import { ConvexError } from 'convex/values';
 import { internal } from './_generated/api';
 import { App } from 'octokit';
 
-
 export const webhookHandler = httpAction(async (ctx, request) => {
   const body = await request.json();
   const { action, installation } = body;
   console.log(action, installation);
 
-  // const headers = request.headers;
-
-  // const isWebhookValid = await verifyWebhookPayload(ctx, { headers, body: request.body });
-  // console.log(isWebhookValid);
-
-  // if (!isWebhookValid) {
-  //   throw new ConvexError('The webhook is invalid');
-  // }
-  console.log(action);
   switch (action) {
     case 'created':
       console.log('created');
@@ -52,7 +42,7 @@ export const getUserToken = action({
         .then((response) => response.json())
         .then((data) => data);
     } catch (error) {
-      throw new Error('Fetching Access token failed')
+      throw new Error(`Fetching Access token failed with error ${error}`);
     }
   }
 });
