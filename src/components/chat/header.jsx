@@ -1,6 +1,7 @@
 import { Fragment, useState, useEffect } from 'react';
 import { useAction, useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
+import { useShowChat } from '../providers/ShowChatProvider';
 
 function NewIssueModal({ setShowIssueModal }) {
   const [issueDetails, setIssueDetails] = useState({
@@ -91,6 +92,8 @@ function NewIssueModal({ setShowIssueModal }) {
 export function ChatHeader() {
   const [showIssueModal, setShowIssueModal] = useState(false);
 
+  const {showChat} = useShowChat();
+
   const updateUserAccessToken = useMutation(api.user.updateUserAccessToken);
   const user = useQuery(api.user.getUser);
   console.log(user);
@@ -178,7 +181,7 @@ export function ChatHeader() {
   }, []);
   return (
     <>
-      <header className="flex items-center justify-between  p-3 border-b border-gray-100">
+      <header className={`${showChat && "hidden " } lg:flex flex  items-center justify-between h-[10vh]  p-3 border-b border-gray-100`}>
         <h1 className="text-gray-600 font-bold text-2xl">Squid</h1>
         {/* <nav className="flex ml-4 md:ml-0">
 					<input

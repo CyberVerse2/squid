@@ -8,11 +8,11 @@ import Modal from '../components/general/components/modal';
 export function Home() {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="flex w-full">
-      {/* <Sidebar openModal={() => setIsOpen(true)} /> */}
-      <div className="w-full ">
+    <div className="flex w-full ">
+      <Sidebar openModal={() => setIsOpen(true)} />
+      <div className="w-full h-screen">
         <ChatHeader />
-        <div className="flex relative  justify-between">
+        <div className="flex relative h-[94vh] justify-between overflow-x-hidden">
           <ChatList />
           <MessageList />
         </div>
