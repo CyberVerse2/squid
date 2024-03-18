@@ -1,5 +1,4 @@
-
-import { Home } from './pages/Home';
+import { Home } from './pages/Home.jsx';
 import './App.css';
 import Index from './pages/index.jsx';
 import { useConvexAuth } from 'convex/react';
@@ -19,13 +18,13 @@ function App() {
 
   return (
     <ShowChatProvider>
-        {isLoading ? (
-          <LoadingSpinner /> // Render the loading spinner if resources are still loading
-        ) : isAuthenticated ? (
-          <Home />
-        ) : (
-          <Index />
-        )}
+      {isLoading ? (
+        <LoadingSpinner /> // Render the loading spinner if resources are still loading
+      ) : isAuthenticated ? (
+        <Home />
+      ) : (
+        <Index />
+      )}
     </ShowChatProvider>
   );
 }
