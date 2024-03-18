@@ -1,5 +1,5 @@
 import { v } from 'convex/values';
-import { userMutation } from './utils';
+import { userMutation, userQuery } from './utils';
 import { getAll, getOneFrom, getManyFrom, getManyVia } from 'convex-helpers/server/relationships';
 import { Id } from './_generated/dataModel';
 
@@ -9,7 +9,7 @@ export const createIssue = userMutation({
     issueId: v.number(),
     number: v.number(),
     url: v.string(),
-    body: v.string(),
+    body: v.union(v.string(), v.null()),
     repositoryName: v.string(),
     repositoryId: v.optional(v.id('repositories')),
     ownerId: v.optional(v.id('users')),
@@ -44,16 +44,16 @@ export const createIssue = userMutation({
     closedAt: v.optional(v.union(v.string(), v.null()))
   },
   async handler(ctx, args) {
-    return ctx.db.insert('issues', args);
+    console.log(ctx.user._id);
+    return ctx.db.insert('issues', { ...args, ownerId: ctx.user._id });
   }
 });
 
-export const getIssues = userMutation({
-  args: {
-    repositoryId: v.id('repositories')
-  },
+export const getIssues = userQuery({
+  args: {},
   async handler(ctx, args) {
-    return getManyFrom(ctx.db, 'issues', 'ownerId', ctx.user.id);
+    const issues = await getManyFrom(ctx.db, 'issues', 'ownerId', ctx.user._id);
+    return issues;
   }
 });
 
@@ -62,8 +62,33 @@ export const getIssue = userMutation({
     issueId: v.id('issues')
   },
   async handler(ctx, args) {
-    // return getOneFrom(ctx.db, 'issues', 'ownerId', ctx.user.id, args.issueId);
+    return await ctx.db.get(args.issueId);
   }
 });
 
+export const getIssueComments = userQuery({
+  args: {
+    issueId: v.number()
+  },
+  async handler(ctx, args) {
+    return await getManyFrom(ctx.db, 'comments', 'issueId', args.issueId);
+  }
+});
 
+export const createComment = userMutation({
+  args: {
+    body: v.string(),
+    url: v.string(),
+    issueId: v.number(),
+    commentId: v.number(),
+    createdAt: v.string(),
+    updatedAt: v.string()
+  },
+  async handler(ctx, args) {
+    const issue = await ctx.db
+      .query('issues')
+      .withIndex('issueId', (q) => q.eq('issueId', args.issueId))
+      .unique();
+    return ctx.db.insert('comments', { ...args, issueId: issue._id });
+  }
+});

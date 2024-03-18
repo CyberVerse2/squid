@@ -1,12 +1,22 @@
+import { useConvexAuth, useQuery } from 'convex/react';
 import { ChatItem } from './chatItem';
+import { api } from '../../../convex/_generated/api';
+import LoadingSpinner from '../general/components/loadingSpinner';
 
-let render = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
 export function ChatList() {
-	return (
-		<div className="lg:w-[30%] w-full  overflow-y-auto px-4 pt-4 pb-0 border-r border-r-gray-200">
-			{render.map((item) => {
-				return <ChatItem key={item} />;
-			})}
-		</div>
-	);
+  let issues = useQuery(api.issues.getIssues);
+  const { isAuthenticated } = useConvexAuth();
+  return (
+    <div className="lg:w-[30%] w-full  overflow-y-auto px-4 pt-4 pb-0 border-r border-r-gray-200">
+      {isAuthenticated ? (
+        issues ? (
+          issues?.map((issue) => <ChatItem key={issue.number} issue={issue} />)
+        ) : (
+          <LoadingSpinner dimension="h-7 w-7" />
+        )
+      ) : (
+        []
+      )}
+    </div>
+  );
 }

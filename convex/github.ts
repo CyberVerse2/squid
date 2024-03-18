@@ -63,62 +63,44 @@ export const createIssue = userAction({
   }
 });
 
-export const getIssueComments = userAction({
+
+export const getIssuesAndComments = userAction({
   args: {
-    issueNumber: v.number(),
-    repo: v.string()
+    state: v.optional(v.union(v.literal('open'), v.literal('closed'), v.literal('all')))
   },
-  async handler(ctx, { repo, issueNumber }) {
+  async handler(ctx, { state }) {
     try {
       const userToken = ctx.user.accessToken;
       const octokit = new Octokit({
         auth: userToken
       });
-      const comments = await octokit.rest.issues.listComments({
-        issue_number: issueNumber,
-        owner: ctx.user.githubUsername,
-        repo: repo,
+      const issues = await octokit.rest.issues.listForAuthenticatedUser({
+        filter: 'all',
+        per_page: 100,
+        state: state as 'open' | 'closed' | 'all',
         headers: {
           'X-GitHub-Api-Version': '2022-11-28'
         }
       });
 
-      return comments.data;
-    } catch (error) {
-      console.error(
-        `Error getting comments for issue ${issueNumber} for ${ctx.user.githubUsername}: ${error}`
+      const issuesData = issues.data;
+      const comments = await Promise.all(
+        issuesData.map(async (issue) => {
+          const comments = await octokit.rest.issues.listComments({
+            issue_number: issue.number,
+            owner: ctx.user.githubUsername,
+            repo: issue.repository.name,
+            headers: {
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          });
+          return comments.data;
+        })
       );
-    }
-  }
-});
 
-export const createIssueComment = userAction({ 
-  args: {
-    issueNumber: v.number(),
-    repo: v.string(),
-    body: v.string()
-  },
-  async handler(ctx, { issueNumber, repo, body }) {
-    try {
-      const userToken = ctx.user.accessToken;
-      const octokit = new Octokit({
-        auth: userToken
-      });
-      const comment = await octokit.rest.issues.createComment({
-        issue_number: issueNumber,
-        owner: ctx.user.githubUsername,
-        repo: repo,
-        body,
-        headers: {
-          'X-GitHub-Api-Version': '2022-11-28'
-        }
-      });
-
-      return comment.data;
+      return { issues: issuesData, comments };
     } catch (error) {
-      console.error(
-        `Error creating comment for issue ${issueNumber} for ${ctx.user.githubUsername}: ${error}`
-      );
+      console.error(`Error getting closed issues for ${ctx.user.githubUsername}: ${error}`);
     }
   }
 });

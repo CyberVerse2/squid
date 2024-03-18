@@ -10,6 +10,14 @@
   font-variation-settings: 'slnt' 0;
 }
 
+.summarized {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }

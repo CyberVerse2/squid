@@ -66,5 +66,21 @@ export default defineSchema({
     closedAt: v.optional(v.union(v.string(), v.null()))
   })
     .index('repositoryId', ['repositoryId'])
-    .index('ownerId', ['ownerId'])
+    .index('issueId', ['issueId'])
+    .index('number', ['number'])
+    .index('ownerId', ['ownerId']),
+
+  comments: defineTable({
+    body: v.string(),
+    url: v.string(),
+    commentId: v.number(),
+    issueId: v.id('issues'),
+    createdAt: v.string(),
+    updatedAt: v.string()
+  })
+    .index('issueId', ['issueId'])
+    .index('commentId', ['commentId'])
+    .index('createdAt', ['createdAt'])
+    .index('updatedAt', ['updatedAt'])
+    .index('body', ['body'])
 });

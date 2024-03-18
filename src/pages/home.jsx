@@ -12,12 +12,12 @@ export function Home() {
       <Sidebar openModal={() => setIsOpen(true)} />
       <div className="w-full h-screen">
         <ChatHeader />
-        <div className="flex relative h-[94vh] justify-between overflow-x-hidden">
+        <div className="flex relative h-screen justify-between overflow-x-hidden">
           <ChatList />
           <MessageList />
         </div>
       </div>
-      { isOpen && <Modal closeModal={() => setIsOpen(false)} />}
+      {isOpen && <Modal closeModal={() => setIsOpen(false)} />}
     </div>
   );
 }

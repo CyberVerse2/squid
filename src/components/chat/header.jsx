@@ -91,16 +91,16 @@ function NewIssueModal({ setShowIssueModal }) {
 
 export function ChatHeader() {
   const [showIssueModal, setShowIssueModal] = useState(false);
-
-  const {showChat} = useShowChat();
-
+  const { isAuthenticated } = useConvexAuth();
+  const { showChat } = useShowChat();
   const updateUserAccessToken = useMutation(api.user.updateUserAccessToken);
   const user = useQuery(api.user.getUser);
-  console.log(user);
   const getUserToken = useAction(api.webhook.getUserToken);
   const getIssues = useAction(api.github.getIssues);
   const createIssue = useMutation(api.issues.createIssue);
-  const { isLoading, isAuthenticated } = useConvexAuth();
+  const createComment = useMutation(api.issues.createComment);
+  const getIssueComments = useAction(api.github.getIssueComments);
+  const getIssuesAndComments = useAction(api.github.getIssuesAndComments);
   const isUserConnected = isAuthenticated && user?.accessToken && user?.accessToken !== 'null';
 
   function loginWithGithub() {
@@ -108,11 +108,13 @@ export function ChatHeader() {
       `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_CLIENT_ID}`
     );
   }
+
   function getCode() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     return urlParams.get('code');
   }
+
   async function storeAccessToken() {
     const codeParam = getCode();
     if (isAuthenticated) {
@@ -120,15 +122,11 @@ export function ChatHeader() {
         const token = await getUserToken({ code: codeParam });
         if (token?.access_token) {
           updateUserAccessToken({ accessToken: token.access_token });
-          const issues = await getIssues({ state: 'open' });
-          const newIssues = issues.map((issue) => {
-            console.log(issue.repository);
-            console.log(issue.user);
-            console.log(issue);
-            console.log(issue.assignees, issue.labels);
-
-            if (issue.user.type !== 'BOT') {
-              const assignees = issue?.assignees
+          const issuesAndComments = await getIssuesAndComments({ state: 'all' });
+          const { issues, comments } = issuesAndComments;
+          issues.forEach((issue) => {
+            if (!issue.pull_request && issue.body) {
+              const assignees = issue.assignees
                 ? issue.assignees.map((assignee) => {
                     return {
                       id: assignee.id,
@@ -149,7 +147,8 @@ export function ChatHeader() {
                     };
                   })
                 : [];
-              return createIssue({
+
+              createIssue({
                 issueId: issue.id,
                 number: issue.number,
                 state: issue.state,
@@ -166,8 +165,23 @@ export function ChatHeader() {
                 assignees,
                 labels
               });
+
+              comments?.forEach(async (comment) => {
+                comment.map(async (comment) => {
+                  if (comment && comment.issue_url === issue.url)
+                    await createComment({
+                      issueId: issue.id,
+                      url: comment.url,
+                      body: comment.body,
+                      commentId: comment.id,
+                      createdAt: comment.created_at,
+                      updatedAt: comment.updated_at
+                    });
+                });
+              });
             }
           });
+          console.log(issuesAndComments);
         } else if (token.error === 'bad_verification_code' && isUserConnected) {
           console.log(token);
           console.log(token.error === 'bad_verification_code', isUserConnected);
@@ -176,26 +190,19 @@ export function ChatHeader() {
       }
     }
   }
+
   useEffect(() => {
     storeAccessToken();
   }, []);
+
   return (
     <>
-      <header className={`${showChat && "hidden " } lg:flex flex  items-center justify-between h-[10vh]  p-3 border-b border-gray-100`}>
+      <header
+        className={`${
+          showChat && 'hidden '
+        } lg:flex flex  items-center justify-between h-[10vh]  p-3 border-b border-gray-100`}
+      >
         <h1 className="text-gray-600 font-bold text-2xl">Squid</h1>
-        {/* <nav className="flex ml-4 md:ml-0">
-					<input
-						className="w-full md:w-[500px] text-sm outline-none border border-gray-200 rounded-md p-2"
-						id="search"
-						placeholder="Search issues, pull requests, and discussions"
-					/>
-					<div
-						onClick={() => setShowIssueModal(!showIssueModal)}
-						className="flex items-center px-3"
-					>
-						<Button size={' small'} text={'New issue'} />
-					</div>
-				</nav> */}
         {showIssueModal && <NewIssueModal setShowIssueModal={setShowIssueModal} />}
         <div>
           <a

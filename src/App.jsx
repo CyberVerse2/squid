@@ -7,6 +7,7 @@ import { useAction, useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { useEffect } from 'react';
 import ShowChatProvider from './components/providers/ShowChatProvider.jsx';
+import IssueProvider from './components/providers/IssueProvider.jsx';
 
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
@@ -17,15 +18,17 @@ function App() {
   }, [isAuthenticated]);
 
   return (
-    <ShowChatProvider>
-      {isLoading ? (
-        <LoadingSpinner /> // Render the loading spinner if resources are still loading
-      ) : isAuthenticated ? (
-        <Home />
-      ) : (
-        <Index />
-      )}
-    </ShowChatProvider>
+    <IssueProvider>
+      <ShowChatProvider>
+        {isLoading ? (
+          <LoadingSpinner /> // Render the loading spinner if resources are still loading
+        ) : isAuthenticated ? (
+          <Home />
+        ) : (
+          <Index />
+        )}
+      </ShowChatProvider>
+    </IssueProvider>
   );
 }
 
