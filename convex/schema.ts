@@ -29,8 +29,10 @@ export default defineSchema({
   issues: defineTable({
     title: v.string(),
     issueId: v.number(),
+    number: v.number(),
     url: v.string(),
     body: v.string(),
+    repositoryName: v.string(),
     repositoryId: v.optional(v.id('repositories')),
     ownerId: v.optional(v.id('users')),
     issueCreator: v.object({
@@ -38,15 +40,30 @@ export default defineSchema({
       username: v.string()
     }),
     state: v.union(v.literal('open'), v.literal('closed')),
-    labels: v.object({
-      id: v.number(),
-      name: v.string(),
-      color: v.string(),
-      url: v.string(),
-      description: v.string(),
-      createdAt: v.string(),
-      updatedAt: v.string()
-    })
+    labels: v.optional(
+      v.array(
+        v.object({
+          id: v.number(),
+          name: v.string(),
+          color: v.string(),
+          url: v.string()
+        })
+      )
+    ),
+    assignees: v.optional(
+      v.array(
+        v.object({
+          id: v.number(),
+          username: v.string(),
+          url: v.string(),
+          type: v.string(),
+          profilePic: v.string()
+        })
+      )
+    ),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+    closedAt: v.optional(v.union(v.string(), v.null()))
   })
     .index('repositoryId', ['repositoryId'])
     .index('ownerId', ['ownerId'])

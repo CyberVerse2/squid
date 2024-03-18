@@ -1,6 +1,4 @@
 import { Fragment, useState, useEffect } from 'react';
-
-import { Button } from '../general/components/button';
 import { useAction, useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 
@@ -98,6 +96,7 @@ export function ChatHeader() {
   console.log(user);
   const getUserToken = useAction(api.webhook.getUserToken);
   const getIssues = useAction(api.github.getIssues);
+  const createIssue = useMutation(api.issues.createIssue);
   const { isLoading, isAuthenticated } = useConvexAuth();
   const isUserConnected = isAuthenticated && user?.accessToken && user?.accessToken !== 'null';
 
@@ -118,7 +117,54 @@ export function ChatHeader() {
         const token = await getUserToken({ code: codeParam });
         if (token?.access_token) {
           updateUserAccessToken({ accessToken: token.access_token });
-          console.log(await getIssues());
+          const issues = await getIssues({ state: 'open' });
+          const newIssues = issues.map((issue) => {
+            console.log(issue.repository);
+            console.log(issue.user);
+            console.log(issue);
+            console.log(issue.assignees, issue.labels);
+
+            if (issue.user.type !== 'BOT') {
+              const assignees = issue?.assignees
+                ? issue.assignees.map((assignee) => {
+                    return {
+                      id: assignee.id,
+                      username: assignee.login,
+                      url: assignee.url,
+                      profilePic: assignee.avatar_url,
+                      type: assignee.type
+                    };
+                  })
+                : [];
+              const labels = issue.labels
+                ? issue.labels.map((label) => {
+                    return {
+                      id: label.id,
+                      name: label.name,
+                      color: label.color,
+                      url: label.url
+                    };
+                  })
+                : [];
+              return createIssue({
+                issueId: issue.id,
+                number: issue.number,
+                state: issue.state,
+                title: issue.title,
+                body: issue.body,
+                repositoryName: issue.repository.full_name,
+                issueCreator: {
+                  profilePic: issue.user.avatar_url,
+                  username: issue.user.login
+                },
+                createdAt: issue.created_at,
+                updatedAt: issue.updated_at,
+                url: issue.url,
+                assignees,
+                labels
+              });
+            }
+          });
         } else if (token.error === 'bad_verification_code' && isUserConnected) {
           console.log(token);
           console.log(token.error === 'bad_verification_code', isUserConnected);
