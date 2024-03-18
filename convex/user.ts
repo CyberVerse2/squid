@@ -1,8 +1,14 @@
 ('use node');
 import { v } from 'convex/values';
-import { internalMutation, mutation, query } from './_generated/server';
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+  mutation,
+  query
+} from './_generated/server';
 import { ConvexError } from 'convex/values';
-import { getCurrentUser, userMutation, userQuery, verifyWebhookPayload } from './utils';
+import { getCurrentUser, userMutation, userQuery } from './utils';
 
 // export const internalGetUser = internalQuery({
 //   args: {},
@@ -12,19 +18,24 @@ import { getCurrentUser, userMutation, userQuery, verifyWebhookPayload } from '.
 // });
 
 export const getUser = userQuery({
-  args: {},
-  async handler(ctx, args) {
-    return getCurrentUser(ctx);
+  async handler(ctx) {
+    return await getCurrentUser(ctx);
+  }
+});
+
+export const internalGetUser = internalQuery({
+  handler(ctx) {
+    return getUser(ctx, {});
   }
 });
 
 export const createUser = userMutation({
   args: {},
   async handler(ctx, _) {
-    const user = await getCurrentUser(ctx);
+    const user = ctx.user;
     const { subject, email, name, pictureUrl, nickname } = await ctx.auth.getUserIdentity();
 
-    if (user.cause) {
+    if ('cause' in user) {
       if (user.cause?.type === 'NOT_FOUND') {
         await ctx.db.insert('users', {
           clerkId: subject,
@@ -44,11 +55,11 @@ export const patchUser = userMutation({
 
   async handler(ctx) {
     const { subject, email, name, profileUrl, nickname } = await ctx.auth.getUserIdentity();
-    const { githubUsername } = await getCurrentUser(ctx);
+    const user = ctx.user;
 
     const [userWithEmailExists] = await ctx.db
       .query('users')
-      .withIndex('by_githubUsername', (q) => q.eq('githubUsername', githubUsername))
+      .withIndex('by_githubUsername', (q) => q.eq('githubUsername', user?.githubUsername))
       .collect();
 
     return userWithEmailExists
@@ -76,8 +87,7 @@ export const updateUser = mutation({
 
     if (!user.githubUsername) throw new ConvexError('User with the github username not found');
 
-    const updatedUser = await ctx.db.patch(user._id, { installationId });
-    console.log(updatedUser);
+    await ctx.db.patch(user._id, { installationId });
   }
 });
 
@@ -97,13 +107,11 @@ export const updateUserOauthCode = mutation({
   },
   async handler(ctx, { oauthCode }) {
     const { githubUsername } = await getCurrentUser(ctx);
-    console.log(githubUsername);
 
-    const [user] = await ctx.db
+    const user = await ctx.db
       .query('users')
       .withIndex('by_githubUsername', (q) => q.eq('githubUsername', githubUsername))
-      .collect();
-    console.log(githubUsername);
+      .unique();
     if (!user.githubUsername) throw new ConvexError('User with the github username not found');
 
     if (oauthCode) {
@@ -116,21 +124,19 @@ export const updateUserOauthCode = mutation({
 
 export const updateUserAccessToken = mutation({
   args: {
-    accessToken: v.string()
+    accessToken: v.union(v.string(), v.null())
   },
-  async handler(ctx, { nickname, accessToken }) {
+  async handler(ctx, { accessToken }) {
     const { githubUsername } = await getCurrentUser(ctx);
-    const [user] = await ctx.db
+    const user = await ctx.db
       .query('users')
       .withIndex('by_githubUsername', (q) => q.eq('githubUsername', githubUsername))
-      .collect();
+      .unique();
 
     if (!user.githubUsername) throw new ConvexError('User with the github username not found');
 
     if (accessToken) {
       await ctx.db.patch(user._id, { accessToken });
-    } else {
-      return null;
     }
   }
 });

@@ -1,3 +1,4 @@
+
 import { Home } from './pages/Home';
 import './App.css';
 import Index from './pages/index.jsx';
@@ -11,19 +12,10 @@ import ShowChatProvider from './components/providers/ShowChatProvider.jsx';
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const createUser = useMutation(api.user.createUser);
-  const getIssues = useAction(api.github.getIssues);
 
   useEffect(() => {
-    getIssues({ githubUsername: 'CyberVerse2', installationId: 48504203, state: 'all' }).then(
-      (issue) => console.log(issue)
-    );
-  }, [getIssues]);
-  
-  useEffect(() => {
-    if (isAuthenticated) {
-      createUser();
-    }
-  }, [createUser, isAuthenticated]);
+    if (isAuthenticated) createUser();
+  }, [isAuthenticated]);
 
   return (
     <ShowChatProvider>
