@@ -1,19 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { Message } from './message';
 import { useUser } from '@clerk/clerk-react';
-import { useShowChat } from '../providers/ShowChatProvider';
 import { useCurrentIssue } from '../providers/IssueProvider';
-import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
 
 export function MessageBox({ chat }) {
   const { user } = useUser();
-  const messageContainer = useRef(null);
-  const { showChat } = useShowChat();
   const { currentIssue } = useCurrentIssue();
-  const getIssueComments = useQuery(api.issues.getIssueComments);
-  const getComments = currentIssue ? getIssueComments({ issueId: currentIssue?.id }) : null;
-  console.log(getComments);
+
+  const messageContainer = useRef(null);
+  console.log({ chat });
 
   useEffect(() => {
     messageContainer.current.scrollTop = messageContainer.current.scrollHeight;
@@ -21,19 +16,25 @@ export function MessageBox({ chat }) {
 
   return currentIssue ? (
     <div ref={messageContainer} className={`py-2 flex-1 overflow-y-auto border-t border-gray-200`}>
-      {chat.map((item, key) => (
-        <Message
-          key={key}
-          username={item.name}
-          text={item.message.text}
-          imageSrc={item.message.imageSrc}
-          me={item.name === user.firstName}
-        />
-      ))}
+      {currentIssue
+        ? chat?.map((item) => (
+            <Message
+              key={item.commentId}
+              username={item.user.username || ''}
+              text={item.body || ''}
+              imageSrc={item.imageSrc || ''}
+              me={item.name === user.firstName}
+              profilePic={item.user.profilePic}
+            />
+          ))
+        : []}
     </div>
   ) : (
-    <div ref={messageContainer} className="text-center flex justify-center">
-      Start a Chat
+    <div
+      ref={messageContainer}
+      className="flex bg-gray-100 justify-center items-center w-full h-full text-2xl"
+    >
+      Your issue comments appear here.
     </div>
   );
 }

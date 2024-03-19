@@ -10,13 +10,6 @@ import {
 import { ConvexError } from 'convex/values';
 import { getCurrentUser, userMutation, userQuery } from './utils';
 
-// export const internalGetUser = internalQuery({
-//   args: {},
-//   async handler(ctx, _) {
-//     await getUser(ctx, {});
-//   }
-// });
-
 export const getUser = userQuery({
   async handler(ctx) {
     return await getCurrentUser(ctx);
@@ -98,27 +91,6 @@ export const internalUpdateUser = internalMutation({
   },
   async handler(ctx, { nickname, installationId }) {
     return updateUser(ctx, { nickname, installationId });
-  }
-});
-
-export const updateUserOauthCode = mutation({
-  args: {
-    oauthCode: v.any()
-  },
-  async handler(ctx, { oauthCode }) {
-    const { githubUsername } = await getCurrentUser(ctx);
-
-    const user = await ctx.db
-      .query('users')
-      .withIndex('by_githubUsername', (q) => q.eq('githubUsername', githubUsername))
-      .unique();
-    if (!user.githubUsername) throw new ConvexError('User with the github username not found');
-
-    if (oauthCode) {
-      await ctx.db.patch(user._id, { oauthCode });
-    } else {
-      return null;
-    }
   }
 });
 

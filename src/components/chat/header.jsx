@@ -113,6 +113,11 @@ export function ChatHeader() {
     return urlParams.get('code');
   }
 
+  function isBotString(string) {
+    const pattern = /\[bot\]$/;
+    return pattern.test(string);
+  }
+
   async function storeAccessToken() {
     const codeParam = getCode();
     if (isAuthenticated) {
@@ -122,63 +127,79 @@ export function ChatHeader() {
           updateUserAccessToken({ accessToken: token.access_token });
           const issuesAndComments = await getIssuesAndComments({ state: 'all' });
           const { issues, comments } = issuesAndComments;
-          issues.forEach((issue) => {
-            if (!issue.pull_request && issue.body) {
-              const assignees = issue.assignees
-                ? issue.assignees.map((assignee) => {
-                    return {
-                      id: assignee.id,
-                      username: assignee.login,
-                      url: assignee.url,
-                      profilePic: assignee.avatar_url,
-                      type: assignee.type
-                    };
-                  })
-                : [];
-              const labels = issue.labels
-                ? issue.labels.map((label) => {
-                    return {
-                      id: label.id,
-                      name: label.name,
-                      color: label.color,
-                      url: label.url
-                    };
-                  })
-                : [];
 
-              createIssue({
-                issueId: issue.id,
-                number: issue.number,
-                state: issue.state,
-                title: issue.title,
-                body: issue.body,
-                repositoryName: issue.repository.full_name,
-                issueCreator: {
-                  profilePic: issue.user.avatar_url,
-                  username: issue.user.login
-                },
-                createdAt: issue.created_at,
-                updatedAt: issue.updated_at,
-                url: issue.url,
-                assignees,
-                labels
-              });
+          await Promise.all(
+            issues.map(async (issue) => {
+              if (!issue.pull_request && issue.body) {
+                const assignees = issue.assignees
+                  ? issue.assignees.map((assignee) => {
+                      return {
+                        id: assignee.id,
+                        username: assignee.login,
+                        url: assignee.url,
+                        profilePic: assignee.avatar_url,
+                        type: assignee.type
+                      };
+                    })
+                  : [];
+                const labels = issue.labels
+                  ? issue.labels.map((label) => {
+                      return {
+                        id: label.id,
+                        name: label.name,
+                        color: label.color,
+                        url: label.url
+                      };
+                    })
+                  : [];
 
-              comments?.forEach(async (comment) => {
-                comment.map(async (comment) => {
-                  if (comment && comment.issue_url === issue.url)
-                    await createComment({
-                      issueId: issue.id,
-                      url: comment.url,
-                      body: comment.body,
-                      commentId: comment.id,
-                      createdAt: comment.created_at,
-                      updatedAt: comment.updated_at
-                    });
+                const newIssue = await createIssue({
+                  issueId: issue.id,
+                  number: issue.number,
+                  state: issue.state,
+                  title: issue.title,
+                  body: issue.body,
+                  repositoryName: issue.repository.full_name,
+                  issueCreator: {
+                    profilePic: issue.user.avatar_url,
+                    username: issue.user.login
+                  },
+                  createdAt: issue.created_at,
+                  updatedAt: issue.updated_at,
+                  url: issue.url,
+                  assignees,
+                  labels
                 });
-              });
-            }
-          });
+
+                await Promise.all(
+                  comments.map(async (comment) => {
+                    comment.map(async (comment) => {
+                      if (
+                        comment &&
+                        comment.issue_url === issue.url &&
+                        !isBotString(comment.user.login)
+                      ) {
+                        console.log(comment);
+                        await createComment({
+                          issueId: newIssue.id,
+                          url: comment.url,
+                          body: comment.body,
+                          commentId: comment.id,
+                          user: {
+                            profilePic: comment.user.avatar_url,
+                            username: comment.user.login
+                          },
+                          createdAt: comment.created_at,
+                          updatedAt: comment.updated_at
+                        });
+                      }
+                    });
+                  })
+                );
+              }
+            })
+          );
+
           console.log(issuesAndComments);
         } else if (token.error === 'bad_verification_code' && isUserConnected) {
           console.log(token);

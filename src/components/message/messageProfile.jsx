@@ -16,7 +16,11 @@ export function MessageProfile() {
           <h3 className="pl-1 text-gray-500"> # {currentIssue.number}</h3>
         </div>
         <div className="flex flex-col py-1 ">
-          <div className="flex py-2 w-full"></div>
+          <div className="flex py-2 w-full">
+            {currentIssue.labels.map((label) => {
+              return <Label key={label.id} color={label.color} text={label.name} />;
+            })}
+          </div>
           <div className="flex">
             <p className="pr-2">
               Celestine opened this issue {getElapsedTimeDescription(currentIssue.updatedAt)} ago.
@@ -26,6 +30,6 @@ export function MessageProfile() {
       </div>
     </div>
   ) : (
-    <div className="flex items-center m-11"></div>
+    <div></div>
   );
 }

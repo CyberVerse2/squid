@@ -1,5 +1,4 @@
-import { useMutation } from 'convex/react';
-import { getIssue } from '../../../convex/issues';
+import {  useQuery } from 'convex/react';
 import { Label } from '../general/components/label';
 import { IssueClosed, IssueOpened } from '../general/icons/issue';
 import { useShowChat } from '../providers/ShowChatProvider';
@@ -10,17 +9,14 @@ import { getElapsedTimeDescription } from '../../utils/getTimeElapsed';
 export function ChatItem({ issue }) {
   const { setShowChat } = useShowChat();
   const { setCurrentIssue } = useCurrentIssue();
-  const getIssue = useMutation(api.issues.getIssue);
+  const getIssue = useQuery(api.issues.getIssue, {issueId: issue._id});                               
   const handleShowChat = () => {
     setShowChat(true);
   };
-
-
-
+  
   async function handleClickIssue() {
     handleShowChat();
-    const newIssue = await getIssue({ issueId: issue._id });
-    setCurrentIssue(newIssue);
+    setCurrentIssue(getIssue);
   }
 
   return (

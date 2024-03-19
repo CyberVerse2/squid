@@ -75,12 +75,16 @@ export default defineSchema({
     url: v.string(),
     commentId: v.number(),
     issueId: v.id('issues'),
+    user: v.object({
+      username: v.string(),
+      profilePic: v.string()
+    }),
     createdAt: v.string(),
     updatedAt: v.string()
   })
-    .index('issueId', ['issueId'])
-    .index('commentId', ['commentId'])
-    .index('createdAt', ['createdAt'])
-    .index('updatedAt', ['updatedAt'])
+  .index('commentId', ['commentId'])
+  .index('createdAt', ['createdAt'])
+  .index('updatedAt', ['updatedAt'])
+  .index('issueId', ['issueId'])
     .index('body', ['body'])
 });

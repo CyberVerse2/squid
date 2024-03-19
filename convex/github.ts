@@ -2,6 +2,7 @@
 import { v } from 'convex/values';
 import { Octokit } from 'octokit';
 import { userAction } from './utils';
+import { internal } from './_generated/api';
 
 export const getIssues = userAction({
   args: {
@@ -63,7 +64,6 @@ export const createIssue = userAction({
   }
 });
 
-
 export const getIssuesAndComments = userAction({
   args: {
     state: v.optional(v.union(v.literal('open'), v.literal('closed'), v.literal('all')))
@@ -101,6 +101,49 @@ export const getIssuesAndComments = userAction({
       return { issues: issuesData, comments };
     } catch (error) {
       console.error(`Error getting closed issues for ${ctx.user.githubUsername}: ${error}`);
+    }
+  }
+});
+
+export const createComment = userAction({
+  args: {
+    issueId: v.id("issues"),
+    issueNumber: v.number(),
+    body: v.string(),
+    repository: v.string()
+  },
+  async handler(ctx, { issueNumber, body, repository, issueId }) {
+    try {
+      const userToken = ctx.user.accessToken;
+      const octokit = new Octokit({
+        auth: userToken
+      });
+      const comment = await octokit.rest.issues.createComment({
+        owner: ctx.user.githubUsername,
+        repo: repository,
+        issue_number: issueNumber,
+        body,
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+      const newComment = comment.data;
+      if (newComment) {
+        const newComment = await ctx.runMutation(internal.issues.internalCreateComment, {
+          issueId,
+          url: comment.data.url,
+          body: comment.data.body,
+          commentId: comment.data.id,
+          user: {
+            profilePic: comment.data.user.avatar_url,
+            username: comment.data.user.login
+          },
+          createdAt: comment.data.created_at,
+          updatedAt: comment.data.updated_at
+        });
+      }
+    } catch (error) {
+      console.error(`Error creating comment for ${ctx.user.githubUsername}: ${error}`);
     }
   }
 });

@@ -1,40 +1,45 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MessageBox } from './messageBox';
 import { MessageInput } from './messageInput';
 import { MessageProfile } from './messageProfile';
-import { useUser } from '@clerk/clerk-react';
 import { useShowChat } from '../providers/ShowChatProvider';
-
-const userChat = [
-  { name: 'Angelina', message: { text: 'Hello, I need help.' } },
-  { name: 'Michael', message: { text: 'Hi there!' } },
-  { name: 'Emma', message: { text: "Hey, what's up?" } },
-  { name: 'James', message: { text: 'Not much, just chilling.' } },
-  { name: 'Sophia', message: { text: 'Nice weather today!' } },
-  { name: 'William', message: { text: "Yes, it's lovely outside." } },
-  {
-    name: 'Olivia',
-    message: { text: 'What are your plans for the weekend?' }
-  },
-  {
-    name: 'Alexander',
-    message: { text: "I'm thinking of going for a hike." }
-  },
-  { name: 'Ava', message: { text: 'That sounds fun! Enjoy your hike.' } },
-  { name: 'Ethan', message: { text: 'Thanks, I will!' } }
-];
-// const chat =
+import { useCurrentIssue } from '../providers/IssueProvider';
+import { useAction, useQuery } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 
 export function MessageList() {
-  const { user } = useUser();
-  const [messages, setMessages] = useState(userChat);
-  const [newMessage, setNewMessage] = useState({ text: '', imageSrc: '' });
+  const { currentIssue } = useCurrentIssue();
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
   const { showChat, setShowChat } = useShowChat();
+  const createComment = useAction(api.github.createComment);
+  const issueComments = useQuery(
+    api.issues.getIssueComments,
 
-  const handleSumbit = (e) => {
+    currentIssue?.url ? { issueId: currentIssue._id } : 'skip'
+  );
+
+  useEffect(() => {
+    if (currentIssue?._id && issueComments) {
+      setMessages(issueComments ? issueComments : []);
+    }
+  }, [currentIssue?._id, issueComments]);
+
+  const handleSumbit = async (e) => {
     e.preventDefault();
-    setMessages((prev) => [...prev, { name: user.firstName, message: newMessage }]);
-    setNewMessage({ text: '', imageSrc: '' });
+    console.log({
+      issueId: currentIssue._id,
+      body: newMessage,
+      repository: currentIssue.repositoryName.split('/')[1],
+      issueNumber: currentIssue.number
+    });
+    await createComment({
+      issueId: currentIssue._id,
+      body: newMessage,
+      repository: currentIssue.repositoryName.split('/')[1],
+      issueNumber: currentIssue.number
+    });
+    setNewMessage('');
   };
   return (
     <div
@@ -53,9 +58,7 @@ export function MessageList() {
           </span>
         </div>
       )}
-
       <MessageBox chat={messages} />
-
       <MessageInput
         setNewMessage={setNewMessage}
         newMessage={newMessage}

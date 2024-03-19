@@ -10,7 +10,7 @@ export function ChatList() {
     <div className="lg:w-[30%] w-full  overflow-y-auto px-4 pt-4 pb-0 border-r border-r-gray-200">
       {isAuthenticated ? (
         issues ? (
-          issues?.map((issue) => <ChatItem key={issue.number} issue={issue} />)
+          issues?.map((issue) => <ChatItem key={issue._id} issue={issue} />)
         ) : (
           <LoadingSpinner dimension="h-7 w-7" />
         )

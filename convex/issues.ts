@@ -1,7 +1,8 @@
-import { v } from 'convex/values';
+import { ConvexError, v } from 'convex/values';
 import { userMutation, userQuery } from './utils';
 import { getAll, getOneFrom, getManyFrom, getManyVia } from 'convex-helpers/server/relationships';
 import { Id } from './_generated/dataModel';
+import { internalMutation } from './_generated/server';
 
 export const createIssue = userMutation({
   args: {
@@ -44,20 +45,20 @@ export const createIssue = userMutation({
     closedAt: v.optional(v.union(v.string(), v.null()))
   },
   async handler(ctx, args) {
-    console.log(ctx.user._id);
-    return ctx.db.insert('issues', { ...args, ownerId: ctx.user._id });
+    console.log(ctx.user?._id);
+    return ctx.db.insert('issues', { ...args, ownerId: ctx.user?._id });
   }
 });
 
 export const getIssues = userQuery({
   args: {},
   async handler(ctx, args) {
-    const issues = await getManyFrom(ctx.db, 'issues', 'ownerId', ctx.user._id);
+    const issues = await getManyFrom(ctx.db, 'issues', 'ownerId', ctx.user?._id);
     return issues;
   }
 });
 
-export const getIssue = userMutation({
+export const getIssue = userQuery({
   args: {
     issueId: v.id('issues')
   },
@@ -68,14 +69,24 @@ export const getIssue = userMutation({
 
 export const getIssueComments = userQuery({
   args: {
-    issueId: v.id("issues")
+    issueId: v.id('issues')
   },
-  async handler(ctx, args) {
-    // const issue = await ctx.db
-    //   .query('issues')
-    //   .withIndex('issueId', (q) => q.eq('issueId', args.issueId))
-    //   .unique();
-    return await getManyFrom(ctx.db, 'comments', 'issueId', args.issueId);
+  async handler(ctx, { issueId }) {
+    console.log(issueId, 'shegeland');
+    const issues1 = await ctx.db
+      .query('comments')
+      .withIndex('issueId', (q) => q.eq('issueId', issueId))
+      .collect();
+
+    console.log({ issues1 });
+
+    const issues = await ctx.db
+      .query('comments')
+      .filter((q) => q.eq(q.field('issueId'), issueId))
+      .collect();
+
+    console.log({ issues });
+    return issues;
   }
 });
 
@@ -83,16 +94,42 @@ export const createComment = userMutation({
   args: {
     body: v.string(),
     url: v.string(),
-    issueId: v.number(),
+    issueId: v.id('issues'),
+    user: v.object({
+      username: v.string(),
+      profilePic: v.string()
+    }),
     commentId: v.number(),
     createdAt: v.string(),
     updatedAt: v.string()
   },
   async handler(ctx, args) {
     const issue = await ctx.db
-      .query('issues')
-      .withIndex('issueId', (q) => q.eq('issueId', args.issueId))
-      .unique();
-    return ctx.db.insert('comments', { ...args, issueId: issue._id });
+      .get(args.issueId)
+
+    if (!issue) {
+      throw new ConvexError(`Issue with index ${args.issueId} not found`);
+    }
+    const newComment = await ctx.db.insert('comments', { ...args, issueId: issue._id });
+
+    return newComment;
+  }
+});
+
+export const internalCreateComment = internalMutation({
+  args: {
+    body: v.string(),
+    url: v.string(),
+    issueId: v.id("issues"),
+    user: v.object({
+      username: v.string(),
+      profilePic: v.string()
+    }),
+    commentId: v.number(),
+    createdAt: v.string(),
+    updatedAt: v.string()
+  },
+  async handler(ctx, args) {
+    return await createComment(ctx, args);
   }
 });
