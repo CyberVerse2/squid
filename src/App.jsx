@@ -11,6 +11,7 @@ import IssueProvider from './components/providers/IssueProvider.jsx';
 
 function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
+
   const createUser = useMutation(api.user.createUser);
 
   useEffect(() => {

@@ -1,15 +1,18 @@
 import { useUser } from '@clerk/clerk-react';
 import { useShowChat } from '../providers/ShowChatProvider';
+import { Fragment, useState } from 'react';
+
+
 
 function SideBarIcon({ handleClick, label, imageUrl, user }) {
   return (
-    <div className="lg:w-aut" onClick={handleClick}>
+    <div className="lg:w-auto" onClick={handleClick}>
       <img className="w-7 block mx-auto pb-1" src={imageUrl} alt="" />
       {<p className={`${user && 'lg:hidden'} text-center text-[.6rem]`}>{label}</p>}
     </div>
   );
 }
-export function Sidebar({ openModal }) {
+export function Sidebar({ openModal, openIssueModal }) {
   const { user } = useUser();
   const { showChat } = useShowChat();
 
@@ -23,7 +26,7 @@ export function Sidebar({ openModal }) {
 
       <div className="flex lg:flex-1  lg:flex-col  h-auto lg:h-20 p-0 lg:pt-14 lg:gap-8 gap-8 [&>*]:w-7 lg:w-6  py-0">
         <SideBarIcon imageUrl="/icons/home.svg" label="home" />
-        <SideBarIcon imageUrl="/icons/add-issue.svg" label="New" />
+        <SideBarIcon handleClick={openIssueModal} imageUrl="/icons/add-issue.svg" label="New" />
         <SideBarIcon imageUrl="/icons/repo.svg" label="Repo" />
       </div>
       <SideBarIcon handleClick={openModal} imageUrl="/icons/settings.svg" label="Settings" />
