@@ -12,7 +12,7 @@ export function MessageBox({ chat }) {
   useEffect(() => {
     messageContainer.current.scrollTop = messageContainer.current.scrollHeight;
   }, [chat]);
-
+  console.log(currentIssue)
   return currentIssue ? (
     <div
       ref={messageContainer}

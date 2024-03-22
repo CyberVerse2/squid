@@ -62,7 +62,7 @@ export const getIssues = userQuery({
     const issues = await getManyFrom(ctx.db, 'issues', 'ownerId', ctx.user?._id);
 
     if (!issues) {
-      throw new ConvexError('No issues found')
+      throw new ConvexError('No issues found');
     }
     return issues;
   }
@@ -76,8 +76,9 @@ export const getIssue = userQuery({
     const issue = await ctx.db.get(args.issueId);
 
     if (!issue) {
-      throw new ConvexError(`Issue with id ${args.issueId} not found`)
+      throw new ConvexError(`Issue with id ${args.issueId} not found`);
     }
+    return issue;
   }
 });
 
@@ -85,13 +86,11 @@ export const getIssueComments = userQuery({
   args: {
     issueId: v.id('issues')
   },
-  async handler({db}, { issueId }) {
-    const comments = await getManyFrom(db, 'comments', 'issueId', issueId);
-    console.log(comments)
-
-    if (!comments.length) {
-      throw new ConvexError('No comments found')
-    }
+  async handler({ db }, { issueId }) {
+    const comments = await db
+      .query('comments')
+      .withIndex('issueId', (q) => q.eq('issueId', issueId))
+      .collect();
 
     return comments;
   }

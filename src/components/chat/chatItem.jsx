@@ -11,12 +11,11 @@ export function ChatItem({ issue }) {
   const { setCurrentIssue } = useCurrentIssue();
   const getIssue = useQuery(api.issues.getIssue, { issueId: issue._id });
   const issueComments = useQuery(api.issues.getIssueComments, { issueId: issue._id });
-  console.log(issueComments);
   const handleShowChat = () => {
     setShowChat(true);
   };
 
-  async function handleClickIssue() {
+  function handleClickIssue() {
     handleShowChat();
     setCurrentIssue(getIssue);
   }
@@ -41,7 +40,11 @@ export function ChatItem({ issue }) {
           {issue.labels.map((label) => {
             return <Label key={label.id} color={label.color} text={label.name} />;
           })}
-          <Label color={'gray-200'} text={`${0} comment${issueComments?.length > 1 ? 's' : ''}`} />
+          <a className={` mr-1 px-2  rounded-md border-none bg-gray-400`}>
+            <p className={`text-[0.6rem] text-gray-100`}>
+              {`${issueComments?.length ?? 0} comment${issueComments?.length > 1 ? 's' : ''}`}
+            </p>
+          </a>
         </div>
       </div>
     </div>

@@ -32,7 +32,6 @@ export const userMutation = customMutation(
   mutation,
   customCtx(async (ctx) => {
     const user = await getCurrentUser(ctx);
-    console.log(user)
     if (user === undefined) {
       throw new ConvexError('User must be logged in.');
     }
