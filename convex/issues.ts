@@ -1,7 +1,6 @@
 import { ConvexError, v } from 'convex/values';
 import { userMutation, userQuery } from './utils';
 import { getAll, getOneFrom, getManyFrom, getManyVia } from 'convex-helpers/server/relationships';
-import { Id } from './_generated/dataModel';
 import { internalMutation } from './_generated/server';
 
 export const createIssue = userMutation({
@@ -61,6 +60,10 @@ export const getIssues = userQuery({
   args: {},
   async handler(ctx, args) {
     const issues = await getManyFrom(ctx.db, 'issues', 'ownerId', ctx.user?._id);
+
+    if (!issues) {
+      throw new ConvexError('No issues found')
+    }
     return issues;
   }
 });
@@ -70,7 +73,11 @@ export const getIssue = userQuery({
     issueId: v.id('issues')
   },
   async handler(ctx, args) {
-    return await ctx.db.get(args.issueId);
+    const issue = await ctx.db.get(args.issueId);
+
+    if (!issue) {
+      throw new ConvexError(`Issue with id ${args.issueId} not found`)
+    }
   }
 });
 
@@ -79,9 +86,14 @@ export const getIssueComments = userQuery({
     issueId: v.id('issues')
   },
   async handler(ctx, { issueId }) {
-    const issues = await getManyFrom(ctx.db, 'comments', 'issueId', issueId);
+    const comments = await getManyFrom(ctx.db, 'comments', 'issueId', issueId);
+    console.log(comments)
 
-    return issues;
+    if (!comments.length) {
+      throw new ConvexError('No comments found')
+    }
+
+    return comments;
   }
 });
 

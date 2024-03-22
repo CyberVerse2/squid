@@ -118,17 +118,7 @@ export const createComment = userAction({
       const octokit = new Octokit({
         auth: userToken
       });
-      console.log(
-        'issueNumber',
-        issueNumber,
-        'body',
-        body,
-        'repository',
-        repository,
-        'issueId',
-        issueId,
-        ctx.user.githubUsername
-      );
+
       const comment = await octokit.rest.issues.createComment({
         owner: ctx.user.githubUsername,
         repo: repository,
