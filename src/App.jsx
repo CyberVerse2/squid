@@ -1,6 +1,6 @@
 import './App.css';
-import Index from './pages/Index.jsx';
-import Home from './pages/Home.jsx'
+import Index from './pages/B.jsx';
+import Home from './pages/A.jsx'
 import { useConvexAuth } from 'convex/react';
 import LoadingSpinner from './components/general/components/loadingSpinner.jsx';
 import { useMutation } from 'convex/react';

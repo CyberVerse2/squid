@@ -1,6 +1,6 @@
 import { SignInButton, SignUpButton } from '@clerk/clerk-react';
 
-export default function Index() {
+export  function Index() {
   return (
     <>
       <header className="flex h-20 w-full shrink-0 items-center px-4 md:px-6">

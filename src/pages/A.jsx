@@ -6,7 +6,7 @@ import { Sidebar } from '../components/sidebar/sidebar';
 import Modal from '../components/general/components/modal';
 import { NewIssueModal } from '../components/chat/newIssue';
 
-export default function Home() {
+export function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [showIssueModal, setShowIssueModal] = useState(false);
   return (
