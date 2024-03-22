@@ -43,9 +43,9 @@ export function MessageList() {
   };
   return (
     <div
-      className={` flex flex-col justify-between px-3 lg:flex-1  border-gray-200  flex-none absolute w-[95%] right-0 ${
+      className={` flex flex-col justify-between px-3 lg:flex-1  border-gray-200 absolute w-[95%] right-0 ${
         !showChat && 'translate-x-full'
-      } lg:translate-x-0 duration-1000 transition-all lg:relative bg-white h-full`}
+      } lg:translate-x-0 duration-1000 transition-all lg:relative bg-white lg:h-[89vh]`}
     >
       <MessageProfile />
       {showChat && (

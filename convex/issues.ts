@@ -45,8 +45,15 @@ export const createIssue = userMutation({
     closedAt: v.optional(v.union(v.string(), v.null()))
   },
   async handler(ctx, args) {
-    console.log(ctx.user?._id);
-    return ctx.db.insert('issues', { ...args, ownerId: ctx.user?._id });
+    const issue = await ctx.db
+      .query('issues')
+      .withIndex('issueId', (q) => q.eq('issueId', args.issueId))
+      .unique();
+    if (!issue) {
+      const issueId = await ctx.db.insert('issues', { ...args, ownerId: ctx.user?._id });
+      const issue = await ctx.db.get(issueId);
+      return issue;
+    }
   }
 });
 
@@ -72,20 +79,8 @@ export const getIssueComments = userQuery({
     issueId: v.id('issues')
   },
   async handler(ctx, { issueId }) {
-    console.log(issueId, 'shegeland');
-    const issues1 = await ctx.db
-      .query('comments')
-      .withIndex('issueId', (q) => q.eq('issueId', issueId))
-      .collect();
+    const issues = await getManyFrom(ctx.db, 'comments', 'issueId', issueId);
 
-    console.log({ issues1 });
-
-    const issues = await ctx.db
-      .query('comments')
-      .filter((q) => q.eq(q.field('issueId'), issueId))
-      .collect();
-
-    console.log({ issues });
     return issues;
   }
 });
@@ -104,15 +99,20 @@ export const createComment = userMutation({
     updatedAt: v.string()
   },
   async handler(ctx, args) {
-    const issue = await ctx.db
-      .get(args.issueId)
+    const issue = await ctx.db.get(args.issueId);
 
     if (!issue) {
       throw new ConvexError(`Issue with index ${args.issueId} not found`);
     }
-    const newComment = await ctx.db.insert('comments', { ...args, issueId: issue._id });
+    const existingComment = await ctx.db
+      .query('comments')
+      .withIndex('commentId', (q) => q.eq('commentId', args.commentId))
+      .unique();
 
-    return newComment;
+    if (!existingComment) {
+      const newComment = await ctx.db.insert('comments', { ...args, issueId: issue._id });
+      return newComment;
+    }
   }
 });
 
@@ -120,7 +120,7 @@ export const internalCreateComment = internalMutation({
   args: {
     body: v.string(),
     url: v.string(),
-    issueId: v.id("issues"),
+    issueId: v.id('issues'),
     user: v.object({
       username: v.string(),
       profilePic: v.string()

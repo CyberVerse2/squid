@@ -1,6 +1,7 @@
 import { useUser } from '@clerk/clerk-react';
 import { useShowChat } from '../providers/ShowChatProvider';
 import { Fragment, useState } from 'react';
+import { useMediaQuery } from 'react-responsive';
 
 
 
@@ -15,11 +16,12 @@ function SideBarIcon({ handleClick, label, imageUrl, user }) {
 export function Sidebar({ openModal, openIssueModal }) {
   const { user } = useUser();
   const { showChat } = useShowChat();
+  const isMobile = useMediaQuery({ query: '(max-width: 768px)' });
 
   return (
     <div
       className={`bg-white backdrop-blur-sm lg:w-20 flex bottom-0 lg:bottom-auto left-1/2 lg:left-0 -translate-x-1/2 lg:translate-x-0 w-full  lg:flex-col lg:justify-start  items-center fixed lg:relative lg:max-h-[100vh]  border border-gray-200  justify-center gap-8 lg:py-4  z-10  py-4 ${
-        showChat && 'hidden'
+        isMobile ? showChat && 'hidden' : ''
       }`}
     >
       <SideBarIcon imageUrl={user.imageUrl} label={user.firstName} user />

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 const Overlay = ({ closeModal, children }) => {
   return createPortal(
     <div
-      className="absolute top-0 left-0 w-full h-full bg-transparent  flex items-center justify-center"
+      className="absolute top-0 left-0 w-full h-full flex items-center justify-center  filter"
       onClick={closeModal}
     >
       {children}

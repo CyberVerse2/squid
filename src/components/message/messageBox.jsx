@@ -8,14 +8,16 @@ export function MessageBox({ chat }) {
   const { currentIssue } = useCurrentIssue();
 
   const messageContainer = useRef(null);
-  console.log({ chat });
 
   useEffect(() => {
     messageContainer.current.scrollTop = messageContainer.current.scrollHeight;
   }, [chat]);
 
   return currentIssue ? (
-    <div ref={messageContainer} className={`py-2 flex-1 overflow-y-auto border-t border-gray-200`}>
+    <div
+      ref={messageContainer}
+      className={`py-2 flex-1 overflow-y-auto border-t border-gray-200`}
+    >
       {currentIssue
         ? chat?.map((item) => (
             <Message

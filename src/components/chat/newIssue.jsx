@@ -1,12 +1,12 @@
-import { useState } from "react";
-import Overlay from "../general/components/overlay";
+import { useState } from 'react';
+import Overlay from '../general/components/overlay';
 
 export function NewIssueModal({ setShowIssueModal }) {
   const [issueDetails, setIssueDetails] = useState({
     name: '',
+    repository: '',
     description: ''
   });
-  const [repos, setRepos] = useState(['Repo1', 'Repo32']);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setIssueDetails((prev) => {
@@ -20,12 +20,12 @@ export function NewIssueModal({ setShowIssueModal }) {
     setShowIssueModal(false);
   };
   return (
-    <Overlay>
-      <form className="bg-white px-4 pb-4  w-[35%] rounded-md top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 fixed z-20">
+    <Overlay closeModal={handleCloseModal}>
+      <form className="bg-white px-4 pb-4  w-[85%] lg:w-[40%] h-3/5 rounded-md font-inter fixed">
         <div className="py-4">
-          <h1 className="text-lg text-center text-gray-500 font-semibold">New Issue</h1>
+          <h4 className="text-lg text-center text-gray-500 font-semibold">New Issue</h4>
           <span
-            className="absolute  w-7 p-2 top-3 right-4 rounded-full bg-gray-400 cursor-pointer"
+            className="absolute  w-7 p-2 top-3 right-4 rounded-full bg-gray-200 cursor-pointer"
             onClick={handleCloseModal}
           >
             <img className=" invert brightness-0 w-full block" src="/icons/cancel.svg" alt="" />
@@ -33,7 +33,7 @@ export function NewIssueModal({ setShowIssueModal }) {
         </div>
         <div>
           <div className="">
-            <label htmlFor="name" className="text-sm text-gray-400 mb-1 block">
+            <label htmlFor="name" className="text-sm text-gray-400 mb-1">
               Name
             </label>
             <input
@@ -49,23 +49,13 @@ export function NewIssueModal({ setShowIssueModal }) {
             <label htmlFor="description" className="text-sm text-gray-400 mb-1 block">
               Repository
             </label>
-            <select
-              name="repo"
-              onChange={handleChange}
-              className="h-10 border block w-full mb-5 rounded-md text-sm text-gray-600 "
-            >
-              {repos.map((repo, index) => (
-                <option className="indent-1 text-gray-300 text-sm" key={index}>
-                  {repo}
-                </option>
-              ))}
-            </select>
+            <input type="text" name="" id="" onChange={handleChange} />
           </div>
           <div>
             <label htmlFor="description" className="text-sm text-gray-400 mb-1 block">
               Description
             </label>
-            <input
+            <textarea
               value={issueDetails.description}
               name="description"
               onChange={handleChange}
@@ -75,11 +65,10 @@ export function NewIssueModal({ setShowIssueModal }) {
             />
           </div>
         </div>
-        <button className="w-full bg-blue-500 font-bold text-white py-2 rounded-md cursor-pointer hover:bg-blue-400">
+        <button className="w-full bg-messageColor  text-white py-2 rounded-md cursor-pointer">
           Create Issue
         </button>
       </form>
     </Overlay>
   );
 }
-

@@ -3,7 +3,6 @@ import { action, internalAction } from './_generated/server';
 import { v } from 'convex/values';
 import { httpAction } from './_generated/server';
 import { GenericActionCtx } from 'convex/server';
-import { getUserId, verifyWebhookPayload } from './utils';
 import { ConvexError } from 'convex/values';
 import { internal } from './_generated/api';
 import { App } from 'octokit';
@@ -62,3 +61,5 @@ export async function handleInstallationCreated(
     status: 200
   });
 }
+
+export async function handleIssueCreated(ctx: GenericActionCtx<any>) {}

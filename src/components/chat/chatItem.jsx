@@ -9,7 +9,8 @@ import { getElapsedTimeDescription } from '../../utils/getTimeElapsed';
 export function ChatItem({ issue }) {
   const { setShowChat } = useShowChat();
   const { setCurrentIssue } = useCurrentIssue();
-  const getIssue = useQuery(api.issues.getIssue, {issueId: issue._id});                               
+  const getIssue = useQuery(api.issues.getIssue, { issueId: issue._id }); 
+  const issueComments = useQuery(api.issues.getIssueComments, { issueId: issue._id });
   const handleShowChat = () => {
     setShowChat(true);
   };
@@ -41,7 +42,7 @@ export function ChatItem({ issue }) {
           })}
           <Label
             color={'gray-200'}
-            text={`${issue.labels.length} comment${issue.labels.length > 1 ? 's' : ''}`}
+            text={`${issueComments.length} comment${issueComments.length > 1 ? 's' : ''}`}
           />
         </div>
       </div>
