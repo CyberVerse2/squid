@@ -1,4 +1,4 @@
-import {  useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { Label } from '../general/components/label';
 import { IssueClosed, IssueOpened } from '../general/icons/issue';
 import { useShowChat } from '../providers/ShowChatProvider';
@@ -9,12 +9,12 @@ import { getElapsedTimeDescription } from '../../utils/getTimeElapsed';
 export function ChatItem({ issue }) {
   const { setShowChat } = useShowChat();
   const { setCurrentIssue } = useCurrentIssue();
-  const getIssue = useQuery(api.issues.getIssue, { issueId: issue._id }); 
-  const issueComments = useQuery(api.issues.getIssueComments, { issueId: issue._id });
+  const getIssue = useQuery(api.issues.getIssue, { issueId: issue._id });
+  const issueComments =  useQuery(api.issues.getIssueComments, { issueId: issue._id });
   const handleShowChat = () => {
     setShowChat(true);
   };
-  
+
   async function handleClickIssue() {
     handleShowChat();
     setCurrentIssue(getIssue);
@@ -42,7 +42,7 @@ export function ChatItem({ issue }) {
           })}
           <Label
             color={'gray-200'}
-            text={`${issueComments.length} comment${issueComments.length > 1 ? 's' : ''}`}
+            text={`${issueComments?.length || 0} comment${issueComments.length > 1 ? 's' : ''}`}
           />
         </div>
       </div>

@@ -85,8 +85,8 @@ export const getIssueComments = userQuery({
   args: {
     issueId: v.id('issues')
   },
-  async handler(ctx, { issueId }) {
-    const comments = await getManyFrom(ctx.db, 'comments', 'issueId', issueId);
+  async handler({db}, { issueId }) {
+    const comments = await getManyFrom(db, 'comments', 'issueId', issueId);
     console.log(comments)
 
     if (!comments.length) {
