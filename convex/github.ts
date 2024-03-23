@@ -45,7 +45,7 @@ export const createIssue = userAction({
       const octokit = new Octokit({
         auth: userToken
       });
-      console.log(ctx.user.githubUsername, repository, title, body, assignees, labels)
+      console.log(ctx.user.githubUsername, repository, title, body, userToken);
       const issue = await octokit.rest.issues.create({
         owner: ctx.user.githubUsername,
         repo: repository,
@@ -84,7 +84,7 @@ export const getIssuesAndComments = userAction({
       });
 
       const issuesData = issues.data;
-      console.log(issuesData)
+      console.log(issuesData);
       const comments = await Promise.all(
         issuesData.map(async (issue) => {
           const comments = await octokit.rest.issues.listComments({
