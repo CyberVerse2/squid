@@ -51,7 +51,8 @@ export function ChatHeader() {
         const token = await getUserToken({ code: codeParam });
         if (token?.access_token) {
           updateUserAccessToken({ accessToken: token.access_token });
-          const { issues, comments } = await getIssuesAndComments({ state: 'all' });
+          const { issues, comments } = await getIssuesAndComments({ state: 'open' });
+          console.log(issues, comments);
           const newIssues = await processIssues(issues);
           const newComments = await processComments(newIssues, comments);
           console.log(newComments);

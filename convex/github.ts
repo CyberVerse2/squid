@@ -84,6 +84,7 @@ export const getIssuesAndComments = userAction({
       });
 
       const issuesData = issues.data;
+      console.log(issuesData)
       const comments = await Promise.all(
         issuesData.map(async (issue) => {
           const comments = await octokit.rest.issues.listComments({

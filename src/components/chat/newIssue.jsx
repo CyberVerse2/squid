@@ -22,12 +22,12 @@ export function NewIssueModal({ setShowIssueModal }) {
   const handleIssueCreated = async (e) => {
     e.preventDefault();
 
-    setIssueDetails({});
     await createIssue({
       title: issueDetails.name,
       body: issueDetails.description,
       repository: issueDetails.repository
     });
+    setIssueDetails({});
     setShowIssueModal();
   };
   return (
