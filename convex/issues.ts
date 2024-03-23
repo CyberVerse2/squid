@@ -1,9 +1,9 @@
 import { ConvexError, v } from 'convex/values';
 import { userMutation, userQuery } from './utils';
 import { getAll, getOneFrom, getManyFrom, getManyVia } from 'convex-helpers/server/relationships';
-import { internalMutation } from './_generated/server';
+import { internalMutation, internalQuery, mutation } from './_generated/server';
 
-export const createIssue = userMutation({
+export const createIssue = mutation({
   args: {
     title: v.string(),
     issueId: v.number(),
@@ -12,7 +12,7 @@ export const createIssue = userMutation({
     body: v.union(v.string(), v.null()),
     repositoryName: v.string(),
     repositoryId: v.optional(v.id('repositories')),
-    ownerId: v.optional(v.id('users')),
+    username: v.string(),
     issueCreator: v.object({
       profilePic: v.string(),
       username: v.string()
@@ -49,17 +49,73 @@ export const createIssue = userMutation({
       .withIndex('issueId', (q) => q.eq('issueId', args.issueId))
       .unique();
     if (!issue) {
-      const issueId = await ctx.db.insert('issues', { ...args, ownerId: ctx.user?._id });
+      const user = await getOneFrom(ctx.db, 'users', 'by_githubUsername', args.username);
+      if (!user) throw new ConvexError(`User with username ${args.username} not found`);
+
+      delete args.username;
+
+      const newIssue = { ...args, ownerId: user._id };
+      const issueId = await ctx.db.insert('issues', newIssue);
+
       const issue = await ctx.db.get(issueId);
       return issue;
     }
   }
 });
 
+export const internalCreateIssue = internalMutation({
+  args: {
+    title: v.string(),
+    issueId: v.number(),
+    number: v.number(),
+    url: v.string(),
+    body: v.union(v.string(), v.null()),
+    repositoryName: v.string(),
+    repositoryId: v.optional(v.id('repositories')),
+    username: v.string(),
+    issueCreator: v.object({
+      profilePic: v.string(),
+      username: v.string()
+    }),
+    state: v.union(v.literal('open'), v.literal('closed')),
+    labels: v.optional(
+      v.array(
+        v.object({
+          id: v.number(),
+          name: v.string(),
+          color: v.string(),
+          url: v.string()
+        })
+      )
+    ),
+    assignees: v.optional(
+      v.array(
+        v.object({
+          id: v.number(),
+          username: v.string(),
+          url: v.string(),
+          type: v.string(),
+          profilePic: v.string()
+        })
+      )
+    ),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+    closedAt: v.optional(v.union(v.string(), v.null()))
+  },
+  async handler(ctx, args) {
+    return createIssue(ctx, args);
+  }
+});
+
 export const getIssues = userQuery({
   args: {},
   async handler(ctx, args) {
-    const issues = await getManyFrom(ctx.db, 'issues', 'ownerId', ctx.user?._id);
+    const issues = await ctx.db
+      .query('issues')
+      .withIndex('ownerId', (q) => q.eq('ownerId', ctx.user._id))
+      .order('desc')
+      .collect();
 
     if (!issues) {
       throw new ConvexError('No issues found');
@@ -82,6 +138,20 @@ export const getIssue = userQuery({
   }
 });
 
+export const getIssueByIssueIndex = internalQuery({
+  args: {
+    issueId: v.number()
+  },
+  async handler(ctx, args) {
+    const issue = await getOneFrom(ctx.db, 'issues', 'issueId', args.issueId);
+
+    if (!issue) {
+      throw new ConvexError(`Issue with id ${args.issueId} not found`);
+    }
+    return issue;
+  }
+});
+
 export const getIssueComments = userQuery({
   args: {
     issueId: v.id('issues')
@@ -96,7 +166,7 @@ export const getIssueComments = userQuery({
   }
 });
 
-export const createComment = userMutation({
+export const createComment = mutation({
   args: {
     body: v.string(),
     url: v.string(),

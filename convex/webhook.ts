@@ -9,13 +9,22 @@ import { App } from 'octokit';
 
 export const webhookHandler = httpAction(async (ctx, request) => {
   const body = await request.json();
-  const { action, installation } = body;
-  console.log(action, installation);
+  const { action } = body;
 
   switch (action) {
     case 'created':
+      const { issue: commentsIssue, comment } = body;
+
       console.log('created');
-      await handleInstallationCreated(ctx, installation, installation.account.login);
+
+      await handleCommentCreated(ctx, commentsIssue, comment);
+
+    case 'opened':
+      const { issue, repository } = body;
+
+      console.log('opened');
+
+      await handleIssueCreated(ctx, issue, repository);
   }
 
   return new Response(`Webhook Recieved`, {
@@ -46,20 +55,70 @@ export const getUserToken = action({
   }
 });
 
-export async function handleInstallationCreated(
-  ctx: GenericActionCtx<any>,
-  installation: any,
-  nickname: string
-) {
-  console.log('THIS ACTIVATED');
-  console.log(nickname, installation);
-  await ctx.runMutation(internal.user.internalUpdateUser, {
-    nickname,
-    installationId: installation.id
+export async function handleCommentCreated(ctx: GenericActionCtx<any>, issue: any, comment: any) {
+  const existingIssue = await ctx.runQuery(internal.issues.getIssueByIssueIndex, {
+    issueId: issue.id
   });
-  return new Response(`Installation Successful with id`, {
-    status: 200
-  });
+  const botUser = /\[bot\]$/;
+  if (comment.issue_url === issue.url && !botUser.test(comment.user.login)) {
+    console.log(comment);
+    const newComment = await ctx.runMutation(internal.issues.internalCreateComment, {
+      commentId: comment.id,
+      body: comment.body,
+      createdAt: comment.created_at,
+      updatedAt: comment.updated_at,
+      url: comment.issue_url,
+      user: {
+        profilePic: comment.user.avatar_url,
+        username: comment.user.login
+      },
+      issueId: existingIssue._id
+    });
+    console.log(newComment);
+  } 
 }
 
-export async function handleIssueCreated(ctx: GenericActionCtx<any>) {}
+function mapAssignees(assignees) {
+  return assignees.map((assignee) => ({
+    id: assignee.id,
+    username: assignee.login,
+    url: assignee.url,
+    profilePic: assignee.avatar_url,
+    type: assignee.type
+  }));
+}
+
+function mapLabels(labels) {
+  return labels.map((label) => ({
+    id: label.id,
+    name: label.name,
+    color: label.color,
+    url: label.url
+  }));
+}
+
+export async function handleIssueCreated(ctx: GenericActionCtx<any>, issue: any, repository: any) {
+  const assignees = issue.assignees ? mapAssignees(issue.assignees) : [];
+  const labels = issue.labels ? mapLabels(issue.labels) : [];
+
+  const newIssue = await ctx.runMutation(internal.issues.internalCreateIssue, {
+    issueId: issue.id,
+    number: issue.number,
+    state: issue.state,
+    title: issue.title,
+    body: issue.body,
+    username: repository.owner.login.toLowerCase(),
+    repositoryName: repository.full_name,
+    issueCreator: {
+      profilePic: issue.user.avatar_url,
+      username: issue.user.login
+    },
+    createdAt: issue.created_at,
+    updatedAt: issue.updated_at,
+    url: issue.url,
+    assignees,
+    labels
+  });
+
+  return newIssue;
+}

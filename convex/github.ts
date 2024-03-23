@@ -45,18 +45,18 @@ export const createIssue = userAction({
       const octokit = new Octokit({
         auth: userToken
       });
+
       const issue = await octokit.rest.issues.create({
         owner: ctx.user.githubUsername,
         repo: repository,
         title,
         body,
-        labels,
-        [`${assignees.length > 1 ? 'assignees' : 'assignee'}`]: assignees,
+        // labels,
+        // [`${assignees.length > 1 ? 'assignees' : 'assignee'}`]: assignees,
         headers: {
           'X-GitHub-Api-Version': '2022-11-28'
         }
       });
-
       return issue.data;
     } catch (error) {
       console.error(`Error creating issue for ${ctx.user.githubUsername}: ${error}`);
@@ -107,12 +107,11 @@ export const getIssuesAndComments = userAction({
 
 export const createComment = userAction({
   args: {
-    issueId: v.id("issues"),
     issueNumber: v.number(),
     body: v.string(),
     repository: v.string()
   },
-  async handler(ctx, { issueNumber, body, repository, issueId }) {
+  async handler(ctx, { issueNumber, body, repository }) {
     try {
       const userToken = ctx.user.accessToken;
       const octokit = new Octokit({
@@ -129,22 +128,9 @@ export const createComment = userAction({
         }
       });
       const newComment = comment.data;
-      if (newComment) {
-        const newComment = await ctx.runMutation(internal.issues.internalCreateComment, {
-          issueId,
-          url: comment.data.url,
-          body: comment.data.body,
-          commentId: comment.data.id,
-          user: {
-            profilePic: comment.data.user.avatar_url,
-            username: comment.data.user.login
-          },
-          createdAt: comment.data.created_at,
-          updatedAt: comment.data.updated_at
-        });
-      }
+      return newComment;
     } catch (error) {
-      console.log(error)
+      console.log(error);
       console.error(`Error creating comment for ${ctx.user.githubUsername}: ${error}`);
     }
   }

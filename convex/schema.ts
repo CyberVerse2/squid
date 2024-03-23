@@ -68,6 +68,7 @@ export default defineSchema({
     .index('repositoryId', ['repositoryId'])
     .index('issueId', ['issueId'])
     .index('number', ['number'])
+    .index('by_updatedAt', ['updatedAt'])
     .index('ownerId', ['ownerId']),
 
   comments: defineTable({
@@ -82,9 +83,9 @@ export default defineSchema({
     createdAt: v.string(),
     updatedAt: v.string()
   })
-  .index('commentId', ['commentId'])
-  .index('createdAt', ['createdAt'])
-  .index('updatedAt', ['updatedAt'])
-  .index('issueId', ['issueId'])
+    .index('commentId', ['commentId'])
+    .index('createdAt', ['createdAt'])
+    .index('updatedAt', ['updatedAt'])
+    .index('issueId', ['issueId'])
     .index('body', ['body'])
 });

@@ -9,6 +9,7 @@ import {
 } from './_generated/server';
 import { ConvexError } from 'convex/values';
 import { getCurrentUser, userMutation, userQuery } from './utils';
+import { getOneFrom } from 'convex-helpers/server/relationships';
 
 export const getUser = userQuery({
   async handler(ctx) {
@@ -19,6 +20,16 @@ export const getUser = userQuery({
 export const internalGetUser = internalQuery({
   handler(ctx) {
     return getUser(ctx, {});
+  }
+});
+
+export const internalGetUserByGithubUsername = internalQuery({
+  args: {
+    githubUsername: v.string()
+  },
+  async handler(ctx, args) {
+    const user = await getOneFrom(ctx.db, 'users', 'by_githubUsername', args.githubUsername);
+    return user;
   }
 });
 

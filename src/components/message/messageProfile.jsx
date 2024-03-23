@@ -1,3 +1,4 @@
+import Markdown from 'react-markdown';
 import { getElapsedTimeDescription } from '../../utils/getTimeElapsed';
 import { Label } from '../general/components/label';
 import { IssueOpened } from '../general/icons/issue';
@@ -7,7 +8,7 @@ export function MessageProfile() {
   const { currentIssue } = useCurrentIssue();
   return currentIssue ? (
     <div className="flex items-center py-4 ">
-      <div className="px-3 flex flex-col">
+      <div className=" flex flex-col">
         <div className="flex">
           <span className="flex items-center">
             <IssueOpened />
@@ -15,6 +16,9 @@ export function MessageProfile() {
           </span>
           <h3 className="pl-1 text-gray-500"> # {currentIssue.number}</h3>
         </div>
+        <h2 className="pt-4 text-[1.15rem]">
+          <Markdown>{currentIssue.body}</Markdown>
+        </h2>
         <div className="flex flex-col py-1 ">
           <div className="flex py-2 w-full">
             {currentIssue.labels.map((label) => {

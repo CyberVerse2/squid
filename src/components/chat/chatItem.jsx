@@ -29,13 +29,13 @@ export function ChatItem({ issue }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             {issue.state === 'open' ? <IssueOpened /> : <IssueClosed />}
-            <h3 className="p-1 summarized">{issue.repositoryName}</h3>
+            <h3 className="p-1 summarized">{issue.title}</h3>
           </div>
           <p className=" fill-previewMessageColor text-[0.6em]">
             {getElapsedTimeDescription(issue.updatedAt)}
           </p>
         </div>
-        <p className="p-1 text-[0.7rem] ">{issue.title}</p>
+        <p className="p-1 text-[0.7rem] ">{issue.repositoryName}</p>
         <div className="flex py-2 w-full">
           {issue.labels.map((label) => {
             return <Label key={label.id} color={label.color} text={label.name} />;

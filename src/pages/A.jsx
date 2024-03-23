@@ -11,16 +11,16 @@ export default function Home() {
   const [showIssueModal, setShowIssueModal] = useState(false);
   return (
     <div className="flex w-full ">
-      <Sidebar openModal={() => setIsOpen(true)} openIssueModal={() => setShowIssueModal(true)}/>
+      <Sidebar openModal={() => setIsOpen(true)} openIssueModal={() => setShowIssueModal(true)} />
       <div className="w-full h-screen">
         <ChatHeader />
-        <div className="flex relative h-screen justify-between overflow-x-hidden">
+        <div className="flex relative h-[90vh] justify-between overflow-x-hidden">
           <ChatList />
           <MessageList />
         </div>
       </div>
       {isOpen && <Modal closeModal={() => setIsOpen(false)} />}
-      {showIssueModal && <NewIssueModal setShowIssueModal={setShowIssueModal} />}
+      {showIssueModal && <NewIssueModal setShowIssueModal={() => setShowIssueModal(false)} />}
     </div>
   );
 }
