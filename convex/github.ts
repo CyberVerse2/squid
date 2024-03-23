@@ -45,7 +45,7 @@ export const createIssue = userAction({
       const octokit = new Octokit({
         auth: userToken
       });
-
+      console.log(ctx.user.githubUsername, repository, title, body, assignees, labels)
       const issue = await octokit.rest.issues.create({
         owner: ctx.user.githubUsername,
         repo: repository,
